@@ -19,7 +19,7 @@ def save_data(value:List[Dict],target:Path = TARGET) -> None:
   else: 
     try:
       with open(target,"w",encoding="utf-8") as file:
-        json.dump(value,target,indent=2,ensure_ascii=False)
+        json.dump(value,file,indent=2,ensure_ascii=False)
     except Exception as e:
       raise HTTPException(status_code=500, detail=f"{str(e)}")
   

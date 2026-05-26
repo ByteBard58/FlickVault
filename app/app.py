@@ -83,8 +83,11 @@ def get_watchedlist(
 def get_item_by_uuid(uuid:UUID = Path(
   description="UUID of the media"
 ), dep = Depends(process_data)):
+  
   result = with_computed(dep)
-  result = [r for r in result if r["uuid"] == uuid]
+  result = [r for r in result if r["uuid"] == str(uuid)]
+  if not result:
+    raise HTTPException(status_code=404,detail=f"No item found with UUID = {uuid} ")
   return JSONResponse(status_code=200, content=result)
 
 @app.get("/item_id/{imdb_id}")
@@ -93,6 +96,8 @@ def get_item_by_imdb_id(imdb_id:str = Path(
 ), dep = Depends(process_data)):
   result = with_computed(dep)
   result = [r for r in result if r["imdb_id"] == imdb_id]
+  if not result:
+    raise HTTPException(status_code=404,detail=f"No item found with IMDB ID = {imdb_id} ")
   return JSONResponse(status_code=200, content=result)
 
 @app.post("/add_item",status_code=201)
