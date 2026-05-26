@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FlickVault - Your Ultimate Movie & TV Show Journal</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- CSS Stylesheet -->
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+  <!-- Background Glow Effects -->
+  <div class="glow-bg">
+    <div class="glow-orb orb-1"></div>
+    <div class="glow-orb orb-2"></div>
+  </div>
+
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="brand">
+        <div class="logo-icon">
+          <i data-lucide="film"></i>
+        </div>
+        <div class="brand-text">
+          <h1>Flick<span>Vault</span></h1>
+          <p>Your Ultimate Movie & TV Show Journal</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <a href="/docs" target="_blank" class="api-btn">
+          <i data-lucide="terminal"></i> API Docs
+        </a>
+      </div>
+    </header>
+
+    <!-- Stats Dashboard Section -->
+    <section class="stats-dashboard glass-panel">
+      <div class="stat-card">
+        <div class="stat-icon icon-purple">
+          <i data-lucide="clapperboard"></i>
+        </div>
+        <div class="stat-info">
+          <span class="stat-label">Total Vaulted</span>
+          <span class="stat-value" id="stat-total">0</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon icon-green">
+          <i data-lucide="check-circle2"></i>
+        </div>
+        <div class="stat-info">
+          <span class="stat-label">Watched Media</span>
+          <span class="stat-value" id="stat-watched">0</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon icon-amber">
+          <i data-lucide="star"></i>
+        </div>
+        <div class="stat-info">
+          <span class="stat-label">Average Rating</span>
+          <span class="stat-value" id="stat-rating">0.0</span>
+        </div>
+      </div>
+
+      <div class="stat-card progress-card">
+        <div class="stat-info">
+          <span class="stat-label">Completion Rate</span>
+          <span class="stat-value" id="stat-completion">0%</span>
+        </div>
+        <div class="progress-ring-container">
+          <svg class="progress-ring" width="60" height="60">
+            <circle class="progress-ring-bg" stroke="rgba(255, 255, 255, 0.05)" stroke-width="6" fill="transparent" r="24" cx="30" cy="30" />
+            <circle class="progress-ring-bar" id="stat-progress-bar" stroke="var(--accent-emerald)" stroke-dasharray="150.79" stroke-dashoffset="150.79" stroke-linecap="round" stroke-width="6" fill="transparent" r="24" cx="30" cy="30" />
+          </svg>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tab Navigation -->
+    <nav class="tab-navigation glass-panel">
+      <button class="tab-btn active" data-tab="all">
+        <i data-lucide="database"></i> All Vault
+      </button>
+      <button class="tab-btn" data-tab="watchlist">
+        <i data-lucide="clock"></i> Watchlist
+      </button>
+      <button class="tab-btn" data-tab="watched">
+        <i data-lucide="eye"></i> Watched
+      </button>
+      <button class="tab-btn highlight" data-tab="add">
+        <i data-lucide="plus"></i> Add Media
+      </button>
+    </nav>
+
+    <!-- Main Content Panels -->
+    <main class="content-container">
+
+      <!-- View & Edit Section (for lists) -->
+      <div id="panel-list" class="tab-panel active">
+        <!-- Search & Filter Controls -->
+        <div class="controls-panel glass-panel">
+          <div class="search-box">
+            <i data-lucide="search"></i>
+            <input type="text" id="search-input" placeholder="Search by title, IMDb ID...">
+          </div>
+          <div class="filters">
+            <select id="filter-year">
+              <option value="">All Years</option>
+            </select>
+            <select id="sort-by">
+              <option value="newest">Added: Newest First</option>
+              <option value="oldest">Added: Oldest First</option>
+              <option value="rating-high">Rating: High to Low</option>
+              <option value="rating-low">Rating: Low to High</option>
+              <option value="title-asc">Title: A to Z</option>
+              <option value="year-desc">Year: Newest First</option>
+            </select>
+            <button class="clear-filters-btn hidden" id="clear-filters">
+              <i data-lucide="x-circle"></i> Clear
+            </button>
+          </div>
+        </div>
+
+        <!-- Media Grid -->
+        <div class="media-grid" id="media-grid">
+          <!-- Dynamically filled with media cards -->
+          <div class="loader-container">
+            <div class="loader"></div>
+            <p>Loading your vault...</p>
+          </div>
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-state hidden" id="empty-state">
+          <div class="empty-icon">
+            <i data-lucide="folder-open"></i>
+          </div>
+          <h3>No media found</h3>
+          <p>Try refining your search or add a new movie/TV show to your vault!</p>
+          <button class="primary-btn" id="empty-add-btn">
+            <i data-lucide="plus"></i> Add First Item
+          </button>
+        </div>
+      </div>
+
+      <!-- Add Media Section -->
+      <div id="panel-add" class="tab-panel">
+        <div class="add-container">
+          <!-- Add Form -->
+          <div class="form-wrapper glass-panel">
+            <div class="form-header">
+              <h2>Add to Vault</h2>
+              <p>Chronicle a new Movie or TV Series in your personal database.</p>
+            </div>
+            
+            <form id="add-media-form" novalidate>
+              <div class="form-grid">
+                <!-- IMDb ID -->
+                <div class="form-group">
+                  <label for="add-imdb-id">IMDb ID <span class="required">*</span></label>
+                  <div class="input-wrapper">
+                    <i data-lucide="hash"></i>
+                    <input type="text" id="add-imdb-id" name="imdb_id" required placeholder="tt0407887" pattern="^tt\d{7,10}$">
+                  </div>
+                  <span class="field-help">Unique ID starting with 'tt' followed by 7-10 digits.</span>
+                  <span class="error-msg">Invalid IMDb ID format (e.g., tt0407887).</span>
+                </div>
+
+                <!-- Title -->
+                <div class="form-group">
+                  <label for="add-title">Title <span class="required">*</span></label>
+                  <div class="input-wrapper">
+                    <i data-lucide="type"></i>
+                    <input type="text" id="add-title" name="title" required placeholder="The Departed" minlength="1" maxlength="300">
+                  </div>
+                  <span class="error-msg">Title is required (cannot start/end with spaces, max 300 chars).</span>
+                </div>
+
+                <!-- Year -->
+                <div class="form-group">
+                  <label for="add-year">Release Year <span class="required">*</span></label>
+                  <div class="input-wrapper">
+                    <i data-lucide="calendar"></i>
+                    <input type="number" id="add-year" name="year" required placeholder="2006" min="1900" max="2050">
+                  </div>
+                  <span class="error-msg">Please enter a valid year between 1900 and 2050.</span>
+                </div>
+
+                <!-- TV Show Checkbox -->
+                <div class="form-group toggle-group">
+                  <label class="toggle-label">
+                    <input type="checkbox" id="add-is-tv">
+                    <span class="toggle-slider"></span>
+                    <span class="toggle-text">This is a TV Series / Show</span>
+                  </label>
+                </div>
+
+                <!-- End Year (TV Show Only) -->
+                <div class="form-group hidden" id="group-end-year">
+                  <label for="add-end-year">Ending Year</label>
+                  <div class="input-wrapper">
+                    <i data-lucide="calendar-range"></i>
+                    <input type="number" id="add-end-year" name="end_year" placeholder="2013" min="1900" max="2050">
+                  </div>
+                  <span class="error-msg">Must be between 1900 and 2050 and >= Release Year.</span>
+                </div>
+
+                <!-- Poster URL -->
+                <div class="form-group full-width">
+                  <label for="add-poster-url">Poster Image URL</label>
+                  <div class="input-wrapper">
+                    <i data-lucide="image"></i>
+                    <input type="url" id="add-poster-url" name="poster_url" placeholder="https://example.com/poster.jpg">
+                  </div>
+                  <span class="field-help">A web link to a high-quality poster image.</span>
+                  <span class="error-msg">Please enter a valid absolute URL (e.g., https://...).</span>
+                </div>
+
+                <!-- Watched Toggle Switch -->
+                <div class="form-group full-width watched-control-card">
+                  <div class="watched-toggle-row">
+                    <div class="toggle-desc">
+                      <h3>Have you watched this?</h3>
+                      <p>Enable to log your personal rating and comments.</p>
+                    </div>
+                    <label class="switch">
+                      <input type="checkbox" id="add-watched" name="watched">
+                      <span class="slider round"></span>
+                    </label>
+                  </div>
+
+                  <!-- Watched Specific Fields -->
+                  <div class="watched-fields-slide hidden" id="watched-fields">
+                    <hr class="form-separator">
+                    <div class="form-grid pt-4">
+                      <!-- Personal Rating -->
+                      <div class="form-group">
+                        <label for="add-rating">Personal Rating (0.0 - 10.0)</label>
+                        <div class="input-wrapper">
+                          <i data-lucide="star-half"></i>
+                          <input type="number" id="add-rating" name="rating" placeholder="8.5" step="0.1" min="0" max="10">
+                        </div>
+                        <span class="error-msg">Please enter a rating between 0.0 and 10.0.</span>
+                      </div>
+
+                      <!-- Review/Comment -->
+                      <div class="form-group full-width">
+                        <label for="add-comment">Review & Comments</label>
+                        <div class="textarea-wrapper">
+                          <textarea id="add-comment" name="comment" placeholder="What did you think of this film/show? minimum 5 characters..." minlength="5" maxlength="1000"></textarea>
+                        </div>
+                        <span class="error-msg">Review must be between 5 and 1000 characters.</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="form-actions full-width">
+                  <button type="button" class="secondary-btn" id="add-reset-btn">
+                    <i data-lucide="rotate-ccw"></i> Reset Form
+                  </button>
+                  <button type="submit" class="primary-btn">
+                    <i data-lucide="send"></i> Add to Vault
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+
+          <!-- Live Preview Side Panel -->
+          <div class="preview-wrapper">
+            <div class="preview-sticky">
+              <span class="preview-badge"><i data-lucide="sparkles"></i> Live Preview</span>
+              <div class="media-card glass-panel" id="live-preview-card">
+                <div class="card-poster">
+                  <img src="https://images.unsplash.com/photo-1594909122845-11baa439b7bf?q=80&w=400&auto=format&fit=crop" id="preview-poster" alt="Poster Preview">
+                  <div class="card-rating-badge" id="preview-rating-container">
+                    <i data-lucide="star"></i> <span id="preview-rating">--</span>
+                  </div>
+                  <span class="media-badge badge-unwatched" id="preview-watched-badge">Watchlist</span>
+                </div>
+                <div class="card-details">
+                  <div class="card-meta">
+                    <span class="card-year" id="preview-year">2026</span>
+                    <span class="card-type-tag" id="preview-type-tag">Movie</span>
+                  </div>
+                  <h3 class="card-title" id="preview-title">Your Media Title</h3>
+                  <p class="card-comment" id="preview-comment">Your thoughts and personal notes will appear here once marked as watched.</p>
+                  <div class="card-actions">
+                    <span class="imdb-pill disabled-pill">
+                      <i data-lucide="external-link"></i> IMDb Link
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Native Modals -->
+  <!-- Edit Media Dialog -->
+  <dialog id="edit-dialog" class="glass-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Update Vault Item</h2>
+        <button class="close-modal-btn" id="close-edit-modal">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <form id="edit-media-form" novalidate>
+        <input type="hidden" id="edit-imdb-id" name="imdb_id">
+        <div class="form-grid">
+          <!-- Title (Read-Only reference / disabled but we show it) -->
+          <div class="form-group full-width">
+            <label>Title</label>
+            <div class="input-wrapper disabled-wrapper">
+              <i data-lucide="type"></i>
+              <input type="text" id="edit-title" disabled>
+            </div>
+          </div>
+
+          <!-- Watched Status Toggle -->
+          <div class="form-group full-width watched-control-card">
+            <div class="watched-toggle-row">
+              <div class="toggle-desc">
+                <h3>Watched Status</h3>
+                <p>Have you watched this title yet?</p>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="edit-watched" name="watched">
+                <span class="slider round"></span>
+              </label>
+            </div>
+
+            <!-- Watched Specific Fields -->
+            <div class="watched-fields-slide hidden" id="edit-watched-fields">
+              <hr class="form-separator">
+              <div class="form-grid pt-4">
+                <!-- Personal Rating -->
+                <div class="form-group">
+                  <label for="edit-rating">Personal Rating (0.0 - 10.0)</label>
+                  <div class="input-wrapper">
+                    <i data-lucide="star-half"></i>
+                    <input type="number" id="edit-rating" name="rating" placeholder="8.5" step="0.1" min="0" max="10">
+                  </div>
+                  <span class="error-msg">Please enter a rating between 0.0 and 10.0.</span>
+                </div>
+
+                <!-- Review/Comment -->
+                <div class="form-group full-width">
+                  <label for="edit-comment">Review & Comments</label>
+                  <div class="textarea-wrapper">
+                    <textarea id="edit-comment" name="comment" placeholder="What did you think of this film/show? minimum 5 characters..." minlength="5" maxlength="1000"></textarea>
+                  </div>
+                  <span class="error-msg">Review must be between 5 and 1000 characters.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Submit Buttons -->
+          <div class="form-actions full-width pt-4">
+            <button type="button" class="secondary-btn" id="cancel-edit-btn">Cancel</button>
+            <button type="submit" class="primary-btn">
+              <i data-lucide="save"></i> Save Changes
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- Delete Confirmation Dialog -->
+  <dialog id="delete-dialog" class="glass-modal modal-danger">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Delete Vault Item?</h2>
+        <button class="close-modal-btn" id="close-delete-modal">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div class="delete-confirm-body">
+        <div class="danger-icon">
+          <i data-lucide="alert-triangle"></i>
+        </div>
+        <p>Are you sure you want to delete <strong id="delete-media-title"></strong> from your vault?</p>
+        <p class="warning-text">This action is irreversible and will permanently erase this item's record, rating, and review.</p>
+      </div>
+      <div class="form-actions full-width pt-4">
+        <button type="button" class="secondary-btn" id="cancel-delete-btn">Cancel</button>
+        <button type="button" class="danger-btn" id="confirm-delete-btn">
+          <i data-lucide="trash-2"></i> Yes, Delete Item
+        </button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Toast Notification Center -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- JS Scripts -->
+  <script src="/static/app.js"></script>
+</body>
+</html>

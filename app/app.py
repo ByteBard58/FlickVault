@@ -1,7 +1,9 @@
+import copy
 from typing import Dict, List
 from uuid import UUID
 from fastapi import FastAPI, Query, Depends, Path, HTTPException
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
 from app.schema.validation import Item, ItemUpdate
 from data.helpers import process_data, add_data, delete_data, update_data
 
@@ -10,11 +12,11 @@ def with_computed(values:List[Dict])-> List[Dict]:
 
 app = FastAPI(title="FlickVault",version="1.0")
 
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
 @app.get("/")
 def home():
-  return JSONResponse(
-    status_code=200, content="Welcome to FlickVault! Check '/docs' to get a solid idea about the API."
-  )
+  return FileResponse("static/index.html")
 
 @app.get("/search")
 def search_with_queries(
@@ -121,13 +123,13 @@ def update_item_by_imdb_id(value:ItemUpdate,imdb_id:str = Path(
   description="IMDB ID of the media", examples=["tt2543164"], pattern=r"^tt\d{7,10}$"
 ),dep = Depends(process_data)):
   whole:List[Dict] = with_computed(dep)
-  existing = [r for r in whole if r["imdb_id"] == imdb_id]
-  if not existing:
+  existing_list = [r for r in whole if r["imdb_id"] == imdb_id]
+  if not existing_list:
     raise HTTPException(
       status_code=404,detail=f"ID = {imdb_id} does not exist"
     ) 
-  existing = existing[0]  
-  existing1 = existing[0]
+  existing = existing_list[0]
+  existing1 = copy.deepcopy(existing)
   value:Dict = value.model_dump(mode="json",exclude_unset=True)
 
   for key_inc, val_inc in value.items():
