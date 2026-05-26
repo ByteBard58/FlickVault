@@ -56,5 +56,20 @@
     "comment": null,
     "date_added": "2026-05-26T14:22:17Z",
     "imdb_link": "https://www.imdb.com/title/tt1130884/"
+  },
+  {
+    "uuid": "f81d2edb-1bb0-4dd1-9a3b-a8a7d5316617",
+    "imdb_id": "tt0903747",
+    "title": "Breaking Bad",
+    "year": 2008,
+    "end_year": 2010,
+    "poster_url": [
+      "https://resizing.flixster.com/aFlnGpyD8kDQFfHsjleVKHSm4qY=/206x305/v2/https://resizing.flixster.com/-XZAfHZM39UwaGJIFWKAE8fS0ak=/v3/t/assets/p185846_b_v8_ad.jpg"
+    ],
+    "watched": true,
+    "rating": 10.0,
+    "comment": "This series is on the highest tier of my personal list. Just like the other 2 or 3 members of this tier, this one will forever remain in my heart.",
+    "date_added": "2026-05-26T18:10:26.052767Z",
+    "imdb_link": "https://www.imdb.com/title/tt0903747/"
   }
 ]
