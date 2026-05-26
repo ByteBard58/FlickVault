@@ -14,20 +14,6 @@
     "date_added": "2026-05-24 05:27:02.275112+00:00"
   },
   {
-    "uuid": "a7b3c94d-1e2f-4a5b-8c9d-0e1f2a3b4c5d",
-    "imdb_id": "tt2543164",
-    "title": "Arrival",
-    "year": 2016,
-    "end_year": null,
-    "poster_url": [
-      "https://upload.wikimedia.org/wikipedia/en/d/df/Arrival%2C_Main_Poster.jpg"
-    ],
-    "watched": true,
-    "rating": 9.0,
-    "comment": "An incredibly smart and emotionally resonant sci-fi that completely redefines the alien first-contact trope.",
-    "date_added": "2026-05-26 05:27:02.275112+00:00"
-  },
-  {
     "uuid": "e2f4a5b6-7c8d-9e0f-1a2b-3c4d5e6f7a8b",
     "imdb_id": "tt0114369",
     "title": "Se7en",
@@ -42,17 +28,33 @@
     "date_added": "2026-05-25 05:27:02.275112+00:00"
   },
   {
+    "uuid": "a7b3c94d-1e2f-4a5b-8c9d-0e1f2a3b4c5d",
+    "imdb_id": "tt2543164",
+    "title": "Arrival",
+    "year": 2016,
+    "end_year": null,
+    "poster_url": [
+      "https://resizing.flixster.com/Gvx_c54Sue_RZrz4U80yCIaAJXU=/206x305/v2/https://resizing.flixster.com/owvDIZEFYCeWRHjrtw8LsmTaFzg=/ems.cHJkLWVtcy1hc3NldHMvbW92aWVzLzBlNjgwNTY3LTgzZGUtNDBkYi05MmRjLTVjZTY2ZmM5YWIxMi53ZWJw"
+    ],
+    "watched": true,
+    "rating": 9.0,
+    "comment": "An incredibly smart and emotionally resonant sci-fi that completely redefines the alien first-contact trope.",
+    "date_added": "2026-05-26T05:27:02.275112Z",
+    "imdb_link": "https://www.imdb.com/title/tt2543164/"
+  },
+  {
     "uuid": "b5c3d2e1-4f6a-7b8c-9d0e-1f2a3b4c5d6e",
     "imdb_id": "tt1130884",
     "title": "Shutter Island",
     "year": 2010,
     "end_year": null,
     "poster_url": [
-      "https://upload.wikimedia.org/wikipedia/en/7/76/Shutter_Island_poster.jpg"
+      "https://resizing.flixster.com/MQeOTONmVgNUI9PMn9KOps7k5vQ=/206x305/v2/https://resizing.flixster.com/-XZAfHZM39UwaGJIFWKAE8fS0ak=/v3/t/assets/p3531967_p_v12_an.jpg"
     ],
     "watched": false,
     "rating": null,
     "comment": null,
-    "date_added": "2026-05-26 14:22:17.000000+00:00"
+    "date_added": "2026-05-26T14:22:17Z",
+    "imdb_link": "https://www.imdb.com/title/tt1130884/"
   }
 ]
