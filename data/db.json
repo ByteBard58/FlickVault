@@ -1,14 +1,16 @@
 [
   {
-    "uuid":"f8eac85e-6f90-4776-ade4-ca035afa0953",
-    "imdb_id":"tt0407887",
-    "title":"The Departed",
-    "year":2006,
-    "end_year":null,
-    "poster_url":"https://upload.wikimedia.org/wikipedia/en/5/50/Departed234.jpg",
-    "watched":true,
-    "rating":8.5,
-    "comment":"One of the most complex plots I have ever seen in a movie.",
+    "uuid": "f8eac85e-6f90-4776-ade4-ca035afa0953",
+    "imdb_id": "tt0407887",
+    "title": "The Departed",
+    "year": 2006,
+    "end_year": null,
+    "poster_url": [
+      "https://upload.wikimedia.org/wikipedia/en/5/50/Departed234.jpg"
+    ],
+    "watched": true,
+    "rating": 8.5,
+    "comment": "One of the most complex plots I have ever seen in a movie.",
     "date_added": "2026-05-24 05:27:02.275112+00:00"
   },
   {
@@ -16,8 +18,10 @@
     "imdb_id": "tt2543164",
     "title": "Arrival",
     "year": 2016,
-    "end_year":null,
-    "poster_url": "https://upload.wikimedia.org/wikipedia/en/d/df/Arrival%2C_Main_Poster.jpg",
+    "end_year": null,
+    "poster_url": [
+      "https://upload.wikimedia.org/wikipedia/en/d/df/Arrival%2C_Main_Poster.jpg"
+    ],
     "watched": true,
     "rating": 9.0,
     "comment": "An incredibly smart and emotionally resonant sci-fi that completely redefines the alien first-contact trope.",
@@ -28,23 +32,42 @@
     "imdb_id": "tt0114369",
     "title": "Se7en",
     "year": 1995,
-    "end_year":null,
-    "poster_url": "https://upload.wikimedia.org/wikipedia/en/6/68/Seven_%28movie%29_poster.jpg",
+    "end_year": null,
+    "poster_url": [
+      "https://upload.wikimedia.org/wikipedia/en/6/68/Seven_%28movie%29_poster.jpg"
+    ],
     "watched": true,
     "rating": 8.6,
     "comment": "A masterclass in tension and atmosphere. The ending leaves you absolutely paralyzed every single time.",
     "date_added": "2026-05-25 05:27:02.275112+00:00"
   },
   {
-  "uuid": "b5c3d2e1-4f6a-7b8c-9d0e-1f2a3b4c5d6e",
-  "imdb_id": "tt1130884",
-  "title": "Shutter Island",
-  "year": 2010,
-  "end_year":null,
-  "poster_url": "https://upload.wikimedia.org/wikipedia/en/7/76/Shutter_Island_poster.jpg",
-  "watched": false,
-  "rating": null,
-  "comment": null,
-  "date_added": "2026-05-26 14:22:17.000000+00:00"
+    "uuid": "b5c3d2e1-4f6a-7b8c-9d0e-1f2a3b4c5d6e",
+    "imdb_id": "tt1130884",
+    "title": "Shutter Island",
+    "year": 2010,
+    "end_year": null,
+    "poster_url": [
+      "https://upload.wikimedia.org/wikipedia/en/7/76/Shutter_Island_poster.jpg"
+    ],
+    "watched": false,
+    "rating": null,
+    "comment": null,
+    "date_added": "2026-05-26 14:22:17.000000+00:00"
+  },
+  {
+    "uuid": "1796843b-bee2-46c2-a595-129366d5d124",
+    "imdb_id": "tt0209144",
+    "title": "Memento",
+    "year": 2006,
+    "end_year": null,
+    "poster_url": [
+      "https://upload.wikimedia.org/wikipedia/en/c/c7/Memento_poster.jpg"
+    ],
+    "watched": true,
+    "rating": 8.5,
+    "comment": "An underrated masterpiece from Nolan. The plot and the ending are just astonishingly well-thought.",
+    "date_added": "2026-05-26T15:09:02.092115Z",
+    "imdb_link": "https://www.imdb.com/title/tt0209144/"
   }
 ]
