@@ -1,0 +1,35 @@
+[
+  {
+    "uuid":"f8eac85e-6f90-4776-ade4-ca035afa0953",
+    "title":"The Departed",
+    "year":2006,
+    "poster_url":"https://upload.wikimedia.org/wikipedia/en/5/50/Departed234.jpg",
+    "watched":true,
+    "rating":8.5,
+    "comment":"One of the most complex plots I have ever seen in a movie.",
+    "imdb_link":"https://www.imdb.com/title/tt0407887/?ref_=nv_sr_srsg_0_tt_7_nm_1_in_0_q_the%20dep",
+    "date_added": "2026-05-26T04:40:15Z"
+  },
+  {
+    "uuid": "a7b3c94d-1e2f-4a5b-8c9d-0e1f2a3b4c5d",
+    "title": "Arrival",
+    "year": 2016,
+    "poster_url": "https://upload.wikimedia.org/wikipedia/en/d/df/Arrival%2C_Main_Poster.jpg",
+    "watched": true,
+    "rating": 9.0,
+    "comment": "An incredibly smart and emotionally resonant sci-fi that completely redefines the alien first-contact trope.",
+    "imdb_link": "https://www.imdb.com/title/tt2543164/?ref_=nv_sr_srsg_0_tt_8_nm_0_in_0_q_arrival",
+    "date_added": "2026-05-26T04:42:15Z"
+  },
+  {
+    "uuid": "e2f4a5b6-7c8d-9e0f-1a2b-3c4d5e6f7a8b",
+    "title": "Se7en",
+    "year": 1995,
+    "poster_url": "https://upload.wikimedia.org/wikipedia/en/6/68/Seven_%28movie%29_poster.jpg",
+    "watched": true,
+    "rating": 8.6,
+    "comment": "A masterclass in tension and atmosphere. The ending leaves you absolutely paralyzed every single time.",
+    "imdb_link": "https://www.imdb.com/title/tt0114369/?ref_=nv_sr_srsg_1_tt_6_nm_1_in_0_q_Seven",
+    "date_added": "2026-05-26T04:47:15Z"
+  }
+]
