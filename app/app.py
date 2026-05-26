@@ -121,12 +121,13 @@ def update_item_by_imdb_id(value:ItemUpdate,imdb_id:str = Path(
   description="IMDB ID of the media", examples=["tt2543164"], pattern=r"^tt\d{7,10}$"
 ),dep = Depends(process_data)):
   whole:List[Dict] = with_computed(dep)
-  existing = [r for r in whole if r["imdb_id"] == imdb_id][0]
-  existing1 = existing
+  existing = [r for r in whole if r["imdb_id"] == imdb_id]
   if not existing:
     raise HTTPException(
       status_code=404,detail=f"ID = {imdb_id} does not exist"
     ) 
+  existing = existing[0]  
+  existing1 = existing[0]
   value:Dict = value.model_dump(mode="json",exclude_unset=True)
 
   for key_inc, val_inc in value.items():
