@@ -27,10 +27,10 @@ def add_data(value:Dict) -> Dict:
   whole:List[Dict] = process_data()
   if any(r["imdb_id"] == value["imdb_id"] for r in whole):
     raise HTTPException(
-      status_code=422, detail=f"ID = {value["imdb_id"]} already exists"
+      status_code=422, detail=f"ID = {value['imdb_id']} already exists"
     )
   else:
-    whole = whole.append(value)
+    whole.append(value)
     save_data(whole)
     return value
 
