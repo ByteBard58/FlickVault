@@ -29,4 +29,3 @@ instance/
 shit/
 *.db
 .vscode/
-data/db.json
