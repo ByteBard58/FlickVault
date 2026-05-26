@@ -1,0 +1,73 @@
+[
+  {
+    "uuid": "f8eac85e-6f90-4776-ade4-ca035afa0953",
+    "imdb_id": "tt0407887",
+    "title": "The Departed",
+    "year": 2006,
+    "end_year": null,
+    "poster_url": [
+      "https://upload.wikimedia.org/wikipedia/en/5/50/Departed234.jpg"
+    ],
+    "watched": true,
+    "rating": 8.5,
+    "comment": "One of the most complex plots I have ever seen in a movie.",
+    "date_added": "2026-05-24 05:27:02.275112+00:00"
+  },
+  {
+    "uuid": "a7b3c94d-1e2f-4a5b-8c9d-0e1f2a3b4c5d",
+    "imdb_id": "tt2543164",
+    "title": "Arrival",
+    "year": 2016,
+    "end_year": null,
+    "poster_url": [
+      "https://upload.wikimedia.org/wikipedia/en/d/df/Arrival%2C_Main_Poster.jpg"
+    ],
+    "watched": true,
+    "rating": 9.0,
+    "comment": "An incredibly smart and emotionally resonant sci-fi that completely redefines the alien first-contact trope.",
+    "date_added": "2026-05-26 05:27:02.275112+00:00"
+  },
+  {
+    "uuid": "e2f4a5b6-7c8d-9e0f-1a2b-3c4d5e6f7a8b",
+    "imdb_id": "tt0114369",
+    "title": "Se7en",
+    "year": 1995,
+    "end_year": null,
+    "poster_url": [
+      "https://upload.wikimedia.org/wikipedia/en/6/68/Seven_%28movie%29_poster.jpg"
+    ],
+    "watched": true,
+    "rating": 8.6,
+    "comment": "A masterclass in tension and atmosphere. The ending leaves you absolutely paralyzed every single time.",
+    "date_added": "2026-05-25 05:27:02.275112+00:00"
+  },
+  {
+    "uuid": "b5c3d2e1-4f6a-7b8c-9d0e-1f2a3b4c5d6e",
+    "imdb_id": "tt1130884",
+    "title": "Shutter Island",
+    "year": 2010,
+    "end_year": null,
+    "poster_url": [
+      "https://upload.wikimedia.org/wikipedia/en/7/76/Shutter_Island_poster.jpg"
+    ],
+    "watched": false,
+    "rating": null,
+    "comment": null,
+    "date_added": "2026-05-26 14:22:17.000000+00:00"
+  },
+  {
+    "uuid": "f1a491d2-cc3b-41d2-a463-af7551509ac5",
+    "imdb_id": "tt0903747",
+    "title": "Breaking Bad",
+    "year": 2008,
+    "end_year": 2013,
+    "poster_url": [
+      "https://preview.redd.it/im-putting-a-breaking-bad-poster-up-along-with-other-shows-v0-a0edzyhginfg1.jpg?width=546&format=pjpg&auto=webp&s=2fbb4aac2f529b2fab57317406b3346147473efa"
+    ],
+    "watched": true,
+    "rating": 10.0,
+    "comment": "One of the greatest series ever made. It is something that I will never forget.",
+    "date_added": "2026-05-26T15:48:41.492060Z",
+    "imdb_link": "https://www.imdb.com/title/tt0903747/"
+  }
+]
