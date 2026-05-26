@@ -56,6 +56,9 @@ cd FlickVault
 
 ```bash
 python -m venv .venv
+```
+
+```bash
 source .venv/bin/activate
 ```
 
@@ -71,11 +74,11 @@ On Windows:
 pip install -r requirements.txt
 ```
 
-### 4. Prepare the database file
+### 4. Prepare the database file (Optional)
 
-The app expects a writable JSON file at `data/db.json`.
+The app expects a writable JSON file at `data/db.json`. So, there is an existing `data/db.json` file with some pre-listed items for convenience.
 
-To start with an empty vault, create `data/db.json` with an empty JSON array:
+To start with an empty vault, delete the existing one and create `data/db.json` with an empty JSON array:
 
 ```json
 []
