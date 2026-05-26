@@ -1,10 +1,10 @@
-# FlickVault
+# 🎬 FlickVault
 
 FlickVault is a personal movie and TV show journal built with FastAPI and a vanilla HTML/CSS/JavaScript frontend. It lets you keep a small local vault of media you have watched or want to watch, including IMDb IDs, posters, ratings, comments, and release years.
 
 The app serves both a browser UI and a JSON API from the same FastAPI server.
 
-## Features
+## ✨ Features
 
 - Browse all saved movies and TV shows in a card-based vault
 - Separate Watchlist and Watched views
@@ -17,14 +17,14 @@ The app serves both a browser UI and a JSON API from the same FastAPI server.
 - Dashboard stats for total items, watched count, average rating, and completion rate
 - Automatic API documentation through FastAPI at `/docs`
 
-## Tech Stack
+## 🧰 Tech Stack
 
 - **Backend:** FastAPI, Pydantic
 - **Frontend:** HTML, CSS, vanilla JavaScript
 - **Storage:** Local JSON file at `data/db.json`
 - **Server:** Uvicorn
 
-## Project Structure
+## 📁 Project Structure
 
 ```text
 FlickVault/
@@ -43,7 +43,7 @@ FlickVault/
 └── README.md
 ```
 
-## Getting Started
+## 🚀 Getting Started
 
 ### 1. Clone the repository
 
@@ -94,9 +94,9 @@ Then open:
 - App UI: <http://127.0.0.1:8000>
 - API docs: <http://127.0.0.1:8000/docs>
 
-## API Overview
+## 🔌 API Overview
 
-### Search media
+### 🔎 Search media
 
 ```http
 GET /search
@@ -115,7 +115,7 @@ Example:
 curl "http://127.0.0.1:8000/search?name=arrival"
 ```
 
-### Get watchlist
+### 📌 Get watchlist
 
 ```http
 GET /watchlist
@@ -123,7 +123,7 @@ GET /watchlist
 
 Returns all items where `watched` is `false`.
 
-### Get watched list
+### ✅ Get watched list
 
 ```http
 GET /watchedlist
@@ -131,13 +131,13 @@ GET /watchedlist
 
 Returns all items where `watched` is `true`.
 
-### Get item by UUID
+### 🆔 Get item by UUID
 
 ```http
 GET /item_uuid/{uuid}
 ```
 
-### Get item by IMDb ID
+### 🎞️ Get item by IMDb ID
 
 ```http
 GET /item_id/{imdb_id}
@@ -149,7 +149,7 @@ Example:
 curl "http://127.0.0.1:8000/item_id/tt2543164"
 ```
 
-### Add item
+### ➕ Add item
 
 ```http
 POST /add_item
@@ -172,7 +172,7 @@ curl -X POST "http://127.0.0.1:8000/add_item" \
   }'
 ```
 
-### Update item
+### ✏️ Update item
 
 ```http
 PUT /update_item/{imdb_id}
@@ -192,7 +192,7 @@ curl -X PUT "http://127.0.0.1:8000/update_item/tt2543164" \
   }'
 ```
 
-### Delete item
+### 🗑️ Delete item
 
 ```http
 DELETE /delete_item/{imdb_id}
@@ -204,7 +204,7 @@ Example:
 curl -X DELETE "http://127.0.0.1:8000/delete_item/tt2543164"
 ```
 
-## Data Model
+## 🧾 Data Model
 
 Each media item is stored as JSON with the following shape:
 
@@ -234,12 +234,12 @@ Validation rules:
 
 The API also computes an `imdb_link` field from the IMDb ID when returning items.
 
-## Notes
+## 📝 Notes
 
 - This project uses `data/db.json` as a simple local database. It is easy to inspect and edit, but it is not designed for concurrent writes or production-scale persistence.
 - The frontend loads Lucide icons and Google Fonts from CDNs, so those assets require an internet connection.
 - FastAPI exposes interactive API documentation at `/docs` and OpenAPI JSON at `/openapi.json`.
 
-## License
+## 📄 License
 
 This project is licensed under the MIT License.
