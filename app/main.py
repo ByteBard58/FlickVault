@@ -1,5 +1,113 @@
+from typing import Dict, List
+from uuid import UUID
 from fastapi import FastAPI, Query, Depends, Path, HTTPException
 from fastapi.responses import JSONResponse
 from schema.validation import Item, ItemUpdate
+from data.helpers import process_data, add_data, delete_data, update_data
+
+def with_computed(values:List[Dict])-> List[Dict]:
+  return [Item.model_validate(p).model_dump(mode="json") for p in values]
 
 app = FastAPI(title="FlickVault",version="1.0")
+
+@app.get("/")
+def home():
+  return JSONResponse(
+    status_code=200, content="Welcome to FlickVault! Check '/docs' to get a solid idea about the API."
+  )
+
+@app.get("/search")
+def search_with_queries(
+  imdb_id:str = Query(
+    default=None,pattern="^tt\d{7,10}$", description="IMDB ID of the media"
+  ),
+  name:str = Query(
+    default= None, pattern="^[^\s].*[^\s]$", max_length=300,
+    description="Title of the media"
+  ),
+  year:int = Query(
+    default=None, description="Year of release", le=2050, ge= 1900
+  ), 
+  watched:bool = Query(
+    default=None, description="`True` if already watched, otherwise `False`"
+  ),
+  dep = Depends(process_data)
+):
+  result = with_computed(dep)
+
+  if imdb_id:
+    result = [r for r in result if r["imdb_id"] == imdb_id]
+  if name:
+    result = [r for r in result if name.lower() in r["title"].lower()]
+  if year:
+    result = [r for r in result if year == r["year"]]
+  if watched is not None: 
+    result = [r for r in result if r["watched"] == watched]
+
+  if not result:
+    raise HTTPException(status_code=404, detail="No item found")
+  else:
+    content = {
+      "items_found":len(result),
+      "items":result
+    }
+    return JSONResponse(
+      status_code=200, content= content
+    )
+
+@app.get("/watchlist")
+def get_watchlist(
+  dep = Depends(process_data)
+):
+  result = with_computed(dep)
+  result = [r for r in result if not r["watched"]]
+  content = {
+    "items_found":len(result),
+    "items":result
+  }
+  return JSONResponse(status_code=200, content=content)
+
+@app.get("/watchedlist")
+def get_watchedlist(
+  dep = Depends(process_data)
+):
+  result = with_computed(dep)
+  result = [r for r in result if r["watched"]]
+  content = {
+    "items_found":len(result),
+    "items":result
+  }
+  return JSONResponse(status_code=200, content=content)
+
+@app.get("/item_uuid/{uuid}")
+def get_item_by_uuid(uuid:UUID = Path(
+  default=None, description="UUID of the media"
+), dep = Depends(process_data)):
+  result = with_computed(dep)
+  result = [r for r in result if r["uuid"] == uuid]
+  return JSONResponse(status_code=200, content=result)
+
+@app.get("/item_id/{imdb_id}")
+def get_item_by_imdb_id(imdb_id:str = Path(
+  default=None, description="IMDB ID of the media", examples=["tt2543164"], pattern="^tt\d{7,10}$"
+), dep = Depends(process_data)):
+  result = with_computed(dep)
+  result = [r for r in result if r["imdb_id"] == imdb_id]
+  return JSONResponse(status_code=200, content=result)
+
+@app.post("/add_item",status_code=201)
+def add_item(payload:Item):
+  payload:dict = payload.model_dump(mode="json")
+  dickt = add_data(payload)
+
+  content = {"status":"addition successful", "added_item":dickt}
+  return JSONResponse(status_code=201, content=content)
+
+@app.delete("/delete_item/{imdb_id}")
+def delete_item_by_imdb_id(imdb_id:str = Path(
+  default=None, description="IMDB ID of the media", examples=["tt2543164"], pattern="^tt\d{7,10}$"
+)):
+  dickt = delete_data(imdb_id)
+  content = {"status":"deletion successful", "deleted_item":dickt}
+  return JSONResponse(status_code=204, content=content)
+
