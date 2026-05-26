@@ -7,12 +7,12 @@ class Item(BaseModel):
   uuid:UUID = Field(default_factory=lambda:uuid4())
   imdb_id: Annotated[str, Field(
     ..., description="Unique IMDB ID of the media",
-    examples=["tt0407887"], pattern="^tt\d{7,10}$"
+    examples=["tt0407887"], pattern=r"^tt\d{7,10}$"
   )]
   title:Annotated[str, Field(
     ..., description="Title of the media", 
     examples=["The Departed","Interstellar","Game Of Thrones"],
-    min_length=1, max_length=300, pattern="^[^\s].*[^\s]$"
+    min_length=1, max_length=300, pattern=r"^[^\s].*[^\s]$"
   )]
   year:Annotated[int,Field(
     description="Year of release",
@@ -54,12 +54,12 @@ class Item(BaseModel):
 class ItemUpdate(BaseModel):
   imdb_id: Annotated[Optional[str], Field(
     default=None, description="Unique IMDB ID of the media",
-    examples=["tt0407887"], pattern="^tt\d{7,10}$"
+    examples=["tt0407887"], pattern=r"^tt\d{7,10}$"
   )]
   title: Annotated[Optional[str], Field(
     default=None, description="Title of the media",
     examples=["The Departed","Interstellar","Game Of Thrones"],
-    min_length=1, max_length=300, pattern="^[^\s].*[^\s]$"
+    min_length=1, max_length=300, pattern=r"^[^\s].*[^\s]$"
   )]
   year: Annotated[Optional[int], Field(
     default=None, description="Year of release",

@@ -2,7 +2,7 @@ from typing import Dict, List
 from uuid import UUID
 from fastapi import FastAPI, Query, Depends, Path, HTTPException
 from fastapi.responses import JSONResponse
-from schema.validation import Item, ItemUpdate
+from app.schema.validation import Item, ItemUpdate
 from data.helpers import process_data, add_data, delete_data, update_data
 
 def with_computed(values:List[Dict])-> List[Dict]:
@@ -19,10 +19,10 @@ def home():
 @app.get("/search")
 def search_with_queries(
   imdb_id:str = Query(
-    default=None,pattern="^tt\d{7,10}$", description="IMDB ID of the media"
+    default=None,pattern=r"^tt\d{7,10}$", description="IMDB ID of the media"
   ),
   name:str = Query(
-    default= None, pattern="^[^\s].*[^\s]$", max_length=300,
+    default= None, pattern=r"^[^\s].*[^\s]$", max_length=300,
     description="Title of the media"
   ),
   year:int = Query(
@@ -81,7 +81,7 @@ def get_watchedlist(
 
 @app.get("/item_uuid/{uuid}")
 def get_item_by_uuid(uuid:UUID = Path(
-  default=None, description="UUID of the media"
+  description="UUID of the media"
 ), dep = Depends(process_data)):
   result = with_computed(dep)
   result = [r for r in result if r["uuid"] == uuid]
@@ -89,7 +89,7 @@ def get_item_by_uuid(uuid:UUID = Path(
 
 @app.get("/item_id/{imdb_id}")
 def get_item_by_imdb_id(imdb_id:str = Path(
-  default=None, description="IMDB ID of the media", examples=["tt2543164"], pattern="^tt\d{7,10}$"
+  description="IMDB ID of the media", examples=["tt2543164"], pattern=r"^tt\d{7,10}$"
 ), dep = Depends(process_data)):
   result = with_computed(dep)
   result = [r for r in result if r["imdb_id"] == imdb_id]
@@ -105,7 +105,7 @@ def add_item(payload:Item):
 
 @app.delete("/delete_item/{imdb_id}")
 def delete_item_by_imdb_id(imdb_id:str = Path(
-  default=None, description="IMDB ID of the media", examples=["tt2543164"], pattern="^tt\d{7,10}$"
+  description="IMDB ID of the media", examples=["tt2543164"], pattern=r"^tt\d{7,10}$"
 )):
   dickt = delete_data(imdb_id)
   content = {"status":"Deletion Successful", "deleted_item":dickt}
@@ -113,7 +113,7 @@ def delete_item_by_imdb_id(imdb_id:str = Path(
 
 @app.put("/update_item/{imdb_id}")
 def update_item_by_imdb_id(value:ItemUpdate,imdb_id:str = Path(
-  default=None, description="IMDB ID of the media", examples=["tt2543164"], pattern="^tt\d{7,10}$"
+  description="IMDB ID of the media", examples=["tt2543164"], pattern=r"^tt\d{7,10}$"
 ),dep = Depends(process_data)):
   whole:List[Dict] = with_computed(dep)
   existing = [r for r in whole if r["imdb_id"] == imdb_id][0]
