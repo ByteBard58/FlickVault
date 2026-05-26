@@ -100,7 +100,7 @@ def add_item(payload:Item):
   payload:dict = payload.model_dump(mode="json")
   dickt = add_data(payload)
 
-  content = {"status":"addition successful", "added_item":dickt}
+  content = {"status":"Addition Successful", "added_item":dickt}
   return JSONResponse(status_code=201, content=content)
 
 @app.delete("/delete_item/{imdb_id}")
@@ -108,6 +108,33 @@ def delete_item_by_imdb_id(imdb_id:str = Path(
   default=None, description="IMDB ID of the media", examples=["tt2543164"], pattern="^tt\d{7,10}$"
 )):
   dickt = delete_data(imdb_id)
-  content = {"status":"deletion successful", "deleted_item":dickt}
-  return JSONResponse(status_code=204, content=content)
+  content = {"status":"Deletion Successful", "deleted_item":dickt}
+  return JSONResponse(status_code=200, content=content)
 
+@app.put("/update_item/{imdb_id}")
+def update_item_by_imdb_id(value:ItemUpdate,imdb_id:str = Path(
+  default=None, description="IMDB ID of the media", examples=["tt2543164"], pattern="^tt\d{7,10}$"
+),dep = Depends(process_data)):
+  whole:List[Dict] = with_computed(dep)
+  existing = [r for r in whole if r["imdb_id"] == imdb_id][0]
+  existing1 = existing
+  if not existing:
+    raise HTTPException(
+      status_code=404,detail=f"ID = {imdb_id} does not exist"
+    ) 
+  value:Dict = value.model_dump(mode="json",exclude_unset=True)
+
+  for key_inc, val_inc in value.items():
+    if isinstance(val_inc,dict) and isinstance(existing.get(key_inc),dict):
+      existing[key_inc] = {**existing.get(key_inc), **val_inc}
+    else:
+      existing[key_inc] = val_inc
+  existing = Item.model_validate(existing).model_dump(mode="json")
+  update_data(existing)
+
+  content = {
+    "status":"Update Successful",
+    "before_update": existing1,
+    "after_update": existing
+  }
+  return JSONResponse(status_code=200, content=content)

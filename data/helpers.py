@@ -48,12 +48,5 @@ def delete_data(imdb_id:str) -> Dict:
 
 def update_data(value:Dict) -> None:
   imdb_id:str = value["imdb_id"]
-  whole:List[Dict] = process_data()
-  existing = [r for r in whole if r["imdb_id"] == imdb_id]
-  if not existing:
-    raise HTTPException(
-      status_code=404,detail=f"ID = {imdb_id} does not exist"
-    )
-  else:
-    delete_data(imdb_id)
-    add_data(value)
+  delete_data(imdb_id)
+  add_data(value)
