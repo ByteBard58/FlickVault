@@ -683,12 +683,13 @@ body {
   color: var(--accent-emerald);
   font-size: 0.75rem;
   font-weight: 600;
-  padding: 0.4rem 0.8rem;
+  padding: 0.4rem 0.5rem;
   border-radius: var(--radius-sm);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
+  justify-content: center;
+  white-space: nowrap;
   transition: var(--transition-smooth);
 }
 
@@ -1336,4 +1337,68 @@ body {
 @keyframes slideOut {
   from { transform: translateX(0); opacity: 1; }
   to { transform: translateX(120%); opacity: 0; }
+}
+
+/* Footer Styles */
+.app-footer {
+  margin-top: auto;
+  padding-top: 3rem;
+  padding-bottom: 1.5rem;
+  width: 100%;
+}
+
+.footer-divider {
+  height: 1px;
+  background: var(--border-light);
+  margin-bottom: 1.5rem;
+}
+
+.footer-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.copyright {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+}
+
+.footer-links {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.footer-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: var(--transition-smooth);
+}
+
+.footer-link:hover {
+  color: var(--accent-indigo);
+}
+
+.footer-link i {
+  width: 14px;
+  height: 14px;
+}
+
+.separator {
+  color: var(--text-disabled);
+  font-size: 0.8125rem;
+}
+
+@media (max-width: 600px) {
+  .footer-content {
+    flex-direction: column;
+    text-align: center;
+  }
 }

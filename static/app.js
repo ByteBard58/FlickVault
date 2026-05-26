@@ -62,7 +62,13 @@ document.addEventListener('DOMContentLoaded', () => {
   const editDialog = document.getElementById('edit-dialog');
   const editForm = document.getElementById('edit-media-form');
   const editImdbId = document.getElementById('edit-imdb-id');
+  const editImdbIdDisplay = document.getElementById('edit-imdb-id-display');
   const editTitle = document.getElementById('edit-title');
+  const editYear = document.getElementById('edit-year');
+  const editIsTv = document.getElementById('edit-is-tv');
+  const editGroupEndYear = document.getElementById('edit-group-end-year');
+  const editEndYear = document.getElementById('edit-end-year');
+  const editPosterUrl = document.getElementById('edit-poster-url');
   const editWatched = document.getElementById('edit-watched');
   const editWatchedFields = document.getElementById('edit-watched-fields');
   const editRating = document.getElementById('edit-rating');
@@ -150,8 +156,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const imdbId = editImdbId.value;
     const isWatched = editWatched.checked;
+    const posterUrls = editPosterUrl.value.trim() ? [editPosterUrl.value.trim()] : null;
 
     const payload = {
+      title: editTitle.value.trim(),
+      year: parseInt(editYear.value),
+      end_year: editIsTv.checked && editEndYear.value ? parseInt(editEndYear.value) : null,
+      poster_url: posterUrls,
       watched: isWatched,
       rating: isWatched && editRating.value ? parseFloat(editRating.value) : null,
       comment: isWatched && editComment.value.trim() ? editComment.value.trim() : null
@@ -169,7 +180,7 @@ document.addEventListener('DOMContentLoaded', () => {
         throw new Error(result.detail || 'Failed to update media.');
       }
 
-      showToast(`Successfully updated "${editTitle.value}"!`, 'success');
+      showToast(`Successfully updated "${payload.title}"!`, 'success');
       editDialog.close();
       await fetchAllItems();
     } catch (error) {
@@ -288,7 +299,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const quickWatchButton = !item.watched 
         ? `<button class="quick-watched-btn" data-imdb="${item.imdb_id}" data-title="${escapeHtml(item.title)}">
-             <i data-lucide="check"></i> Watched
+             Watched
            </button>`
         : '';
         
@@ -523,15 +534,30 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!item) return;
 
     editImdbId.value = item.imdb_id;
+    editImdbIdDisplay.value = item.imdb_id;
     editTitle.value = item.title;
+    editYear.value = item.year || '';
+    
+    const isTv = !!item.end_year;
+    editIsTv.checked = isTv;
+    if (isTv) {
+      editGroupEndYear.classList.remove('hidden');
+      editEndYear.disabled = false;
+      editEndYear.value = item.end_year || '';
+    } else {
+      editGroupEndYear.classList.add('hidden');
+      editEndYear.disabled = true;
+      editEndYear.value = '';
+    }
+
+    editPosterUrl.value = (item.poster_url && item.poster_url.length > 0) ? item.poster_url[0] : '';
     editWatched.checked = item.watched;
 
     if (item.watched) {
       editWatchedFields.classList.add('active');
       editWatchedFields.classList.remove('hidden');
-      editRating.value = item.rating || '';
+      editRating.value = item.rating !== null && item.rating !== undefined ? item.rating : '';
       editComment.value = item.comment || '';
-      // Make fields active/required
       editRating.disabled = false;
       editComment.disabled = false;
     } else {
@@ -589,12 +615,23 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // TV show end year validation
-    if (form.id === 'add-media-form' && addIsTv.checked && addEndYear.value) {
-      const relYear = parseInt(addYear.value);
-      const endYear = parseInt(addEndYear.value);
-      if (endYear < relYear || endYear < 1900 || endYear > 2050) {
-        markInputError(addEndYear);
-        isValid = false;
+    if (form.id === 'add-media-form') {
+      if (addIsTv.checked && addEndYear.value) {
+        const relYear = parseInt(addYear.value);
+        const endYear = parseInt(addEndYear.value);
+        if (endYear < relYear || endYear < 1900 || endYear > 2050) {
+          markInputError(addEndYear);
+          isValid = false;
+        }
+      }
+    } else if (form.id === 'edit-media-form') {
+      if (editIsTv.checked && editEndYear.value) {
+        const relYear = parseInt(editYear.value);
+        const endYear = parseInt(editEndYear.value);
+        if (endYear < relYear || endYear < 1900 || endYear > 2050) {
+          markInputError(editEndYear);
+          isValid = false;
+        }
       }
     }
 
@@ -800,6 +837,18 @@ document.addEventListener('DOMContentLoaded', () => {
   // Submit handlers
   addForm.addEventListener('submit', handleAddSubmit);
   editForm.addEventListener('submit', handleEditSubmit);
+
+  // Edit TV checkbox toggle
+  editIsTv.addEventListener('change', (e) => {
+    if (e.target.checked) {
+      editGroupEndYear.classList.remove('hidden');
+      editEndYear.disabled = false;
+    } else {
+      editGroupEndYear.classList.add('hidden');
+      editEndYear.disabled = true;
+      editEndYear.value = '';
+    }
+  });
 
   // Edit Watched fields toggle
   editWatched.addEventListener('change', (e) => {

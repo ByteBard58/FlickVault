@@ -309,6 +309,23 @@
         </div>
       </div>
     </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <div class="footer-divider"></div>
+      <div class="footer-content">
+        <p class="copyright">&copy; 2026 FlickVault. All rights reserved.</p>
+        <div class="footer-links">
+          <a href="https://github.com/ByteBard58/FlickVault" target="_blank" class="footer-link">
+            <i data-lucide="github"></i> GitHub Repository
+          </a>
+          <span class="separator">&bull;</span>
+          <a href="https://github.com/ByteBard58/FlickVault/blob/main/LICENSE" target="_blank" class="footer-link">
+            <i data-lucide="scale"></i> MIT License
+          </a>
+        </div>
+      </div>
+    </footer>
   </div>
 
   <!-- Native Modals -->
@@ -324,13 +341,62 @@
       <form id="edit-media-form" novalidate>
         <input type="hidden" id="edit-imdb-id" name="imdb_id">
         <div class="form-grid">
-          <!-- Title (Read-Only reference / disabled but we show it) -->
-          <div class="form-group full-width">
-            <label>Title</label>
+          <!-- IMDb ID (Read-Only reference) -->
+          <div class="form-group">
+            <label>IMDb ID</label>
             <div class="input-wrapper disabled-wrapper">
-              <i data-lucide="type"></i>
-              <input type="text" id="edit-title" disabled>
+              <i data-lucide="hash"></i>
+              <input type="text" id="edit-imdb-id-display" disabled>
             </div>
+          </div>
+
+          <!-- Title -->
+          <div class="form-group">
+            <label for="edit-title">Title <span class="required">*</span></label>
+            <div class="input-wrapper">
+              <i data-lucide="type"></i>
+              <input type="text" id="edit-title" name="title" required placeholder="The Departed" minlength="1" maxlength="300">
+            </div>
+            <span class="error-msg">Title is required (no starting/ending spaces, max 300 chars).</span>
+          </div>
+
+          <!-- Year -->
+          <div class="form-group">
+            <label for="edit-year">Release Year <span class="required">*</span></label>
+            <div class="input-wrapper">
+              <i data-lucide="calendar"></i>
+              <input type="number" id="edit-year" name="year" required placeholder="2006" min="1900" max="2050">
+            </div>
+            <span class="error-msg">Please enter a valid year between 1900 and 2050.</span>
+          </div>
+
+          <!-- TV Show Checkbox -->
+          <div class="form-group toggle-group">
+            <label class="toggle-label">
+              <input type="checkbox" id="edit-is-tv">
+              <span class="toggle-slider"></span>
+              <span class="toggle-text">This is a TV Series / Show</span>
+            </label>
+          </div>
+
+          <!-- End Year (TV Show Only) -->
+          <div class="form-group hidden" id="edit-group-end-year">
+            <label for="edit-end-year">Ending Year</label>
+            <div class="input-wrapper">
+              <i data-lucide="calendar-range"></i>
+              <input type="number" id="edit-end-year" name="end_year" placeholder="2013" min="1900" max="2050">
+            </div>
+            <span class="error-msg">Must be between 1900 and 2050 and >= Release Year.</span>
+          </div>
+
+          <!-- Poster URL -->
+          <div class="form-group full-width">
+            <label for="edit-poster-url">Poster Image URL</label>
+            <div class="input-wrapper">
+              <i data-lucide="image"></i>
+              <input type="url" id="edit-poster-url" name="poster_url" placeholder="https://example.com/poster.jpg">
+            </div>
+            <span class="error-msg">Please enter a valid absolute URL.</span>
           </div>
 
           <!-- Watched Status Toggle -->
