@@ -25,6 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const signOutBtn = document.getElementById('sign-out-btn');
   const changePasswordBtn = document.getElementById('change-password-btn');
   const deleteAccountBtn = document.getElementById('delete-account-btn');
+  const accountActionGroup = document.getElementById('account-action-group');
   const userEmail = document.getElementById('user-email');
   const panels = {
     list: document.getElementById('panel-list'),
@@ -98,12 +99,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
 
   const passwordDialog = document.getElementById('password-dialog');
+  const passwordDialogBackdrop = document.getElementById('password-dialog-backdrop');
   const passwordForm = document.getElementById('password-form');
   const accountPasswordInput = document.getElementById('account-password');
   const closePasswordModal = document.getElementById('close-password-modal');
   const cancelPasswordBtn = document.getElementById('cancel-password-btn');
 
   const deleteAccountDialog = document.getElementById('delete-account-dialog');
+  const deleteAccountDialogBackdrop = document.getElementById('delete-account-dialog-backdrop');
   const confirmAccountDeleteBtn = document.getElementById('confirm-account-delete-btn');
   const closeAccountDeleteModal = document.getElementById('close-account-delete-modal');
   const cancelAccountDeleteBtn = document.getElementById('cancel-account-delete-btn');
@@ -154,15 +157,13 @@ document.addEventListener('DOMContentLoaded', () => {
       userEmail.textContent = currentSession.user?.email || '';
       userEmail.classList.remove('hidden');
       signOutBtn.classList.remove('hidden');
-      changePasswordBtn.classList.remove('hidden');
-      deleteAccountBtn.classList.remove('hidden');
+      accountActionGroup.classList.remove('hidden');
       showVault();
     } else {
       state.items = [];
       userEmail.classList.add('hidden');
       signOutBtn.classList.add('hidden');
-      changePasswordBtn.classList.add('hidden');
-      deleteAccountBtn.classList.add('hidden');
+      accountActionGroup.classList.add('hidden');
       hideVault();
     }
   }
@@ -236,12 +237,36 @@ document.addEventListener('DOMContentLoaded', () => {
   function openPasswordDialog() {
     if (!passwordDialog) return;
     accountPasswordInput.value = '';
+    clearValidationErrors(passwordForm);
     passwordDialog.showModal();
+    if (passwordDialogBackdrop) passwordDialogBackdrop.setAttribute('data-open', 'true');
+    lucide.createIcons();
   }
 
   function openDeleteAccountDialog() {
     if (!deleteAccountDialog) return;
+    clearValidationErrors(passwordForm);
     deleteAccountDialog.showModal();
+    if (deleteAccountDialogBackdrop) deleteAccountDialogBackdrop.setAttribute('data-open', 'true');
+    lucide.createIcons();
+  }
+
+  function closePasswordDialog() {
+    passwordDialog.close();
+    if (passwordDialogBackdrop) passwordDialogBackdrop.setAttribute('data-open', 'false');
+  }
+
+  function closeDeleteAccountDialog() {
+    deleteAccountDialog.close();
+    if (deleteAccountDialogBackdrop) deleteAccountDialogBackdrop.setAttribute('data-open', 'false');
+  }
+
+  // Backdrop click to close
+  if (passwordDialogBackdrop) {
+    passwordDialogBackdrop.addEventListener('click', closePasswordDialog);
+  }
+  if (deleteAccountDialogBackdrop) {
+    deleteAccountDialogBackdrop.addEventListener('click', closeDeleteAccountDialog);
   }
 
   async function handleChangePassword(e) {
@@ -267,7 +292,7 @@ document.addEventListener('DOMContentLoaded', () => {
         throw new Error(text || 'Unable to update password.');
       }
 
-      passwordDialog.close();
+      closePasswordDialog();
       showToast('Password updated successfully.', 'success');
     } catch (error) {
       showToast(error.message, 'error');
@@ -285,7 +310,7 @@ document.addEventListener('DOMContentLoaded', () => {
         throw new Error(text || 'Unable to delete account.');
       }
 
-      if (deleteAccountDialog) deleteAccountDialog.close();
+      closeDeleteAccountDialog();
       await handleSignOut();
       showToast('Account deleted successfully.', 'success');
     } catch (error) {
@@ -971,10 +996,18 @@ document.addEventListener('DOMContentLoaded', () => {
   changePasswordBtn.addEventListener('click', openPasswordDialog);
   deleteAccountBtn.addEventListener('click', openDeleteAccountDialog);
   passwordForm.addEventListener('submit', handleChangePassword);
-  closePasswordModal.addEventListener('click', () => passwordDialog.close());
-  cancelPasswordBtn.addEventListener('click', () => passwordDialog.close());
-  closeAccountDeleteModal.addEventListener('click', () => deleteAccountDialog.close());
-  cancelAccountDeleteBtn.addEventListener('click', () => deleteAccountDialog.close());
+  passwordDialog.addEventListener('close', () => {
+    clearValidationErrors(passwordForm);
+  });
+  
+  deleteAccountDialog.addEventListener('close', () => {
+    clearValidationErrors(passwordForm);
+  });
+  
+  closePasswordModal.addEventListener('click', closePasswordDialog);
+  cancelPasswordBtn.addEventListener('click', closePasswordDialog);
+  closeAccountDeleteModal.addEventListener('click', closeDeleteAccountDialog);
+  cancelAccountDeleteBtn.addEventListener('click', closeDeleteAccountDialog);
   confirmAccountDeleteBtn.addEventListener('click', handleDeleteAccount);
   
   // Tabs Navigation

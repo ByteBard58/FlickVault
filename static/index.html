@@ -37,13 +37,17 @@
       </div>
       <div class="header-actions">
         <span class="user-email hidden" id="user-email"></span>
-        <button type="button" class="api-btn hidden" id="change-password-btn">
-          <i data-lucide="key"></i> Change Password
-        </button>
-        <button type="button" class="api-btn hidden danger-btn" id="delete-account-btn">
-          <i data-lucide="trash-2"></i> Delete Account
-        </button>
-        <button type="button" class="api-btn hidden" id="sign-out-btn">
+        <div class="account-action-group hidden" id="account-action-group">
+          <button type="button" class="header-icon-btn" id="change-password-btn" aria-label="Change Password">
+            <i data-lucide="key-round"></i>
+            <span class="btn-tooltip">Change Password</span>
+          </button>
+          <button type="button" class="header-icon-btn header-icon-btn--danger" id="delete-account-btn" aria-label="Delete Account">
+            <i data-lucide="user-x"></i>
+            <span class="btn-tooltip">Delete Account</span>
+          </button>
+        </div>
+        <button type="button" class="secondary-btn hidden" id="sign-out-btn">
           <i data-lucide="log-out"></i> Sign Out
         </button>
         <a href="/docs" target="_blank" class="api-btn">
@@ -85,41 +89,57 @@
       </form>
     </section>
 
-    <dialog class="glass-panel account-dialog" id="password-dialog">
-      <form id="password-form" class="account-form" method="dialog">
-        <div class="form-header">
-          <h3>Change Password</h3>
-          <button type="button" class="icon-btn" id="close-password-modal" aria-label="Close dialog">
+    <dialog class="glass-modal" id="password-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2><i data-lucide="key-round"></i>Change Password</h2>
+          <button class="close-modal-btn" id="close-password-modal" aria-label="Close dialog">
             <i data-lucide="x"></i>
           </button>
         </div>
-        <div class="form-group full-width">
-          <label for="account-password">New Password</label>
-          <div class="input-wrapper">
-            <i data-lucide="key-round"></i>
-            <input type="password" id="account-password" required minlength="6" placeholder="Enter new password">
+        <form id="password-form" novalidate>
+          <div class="form-group full-width">
+            <label for="account-password">New Password</label>
+            <div class="input-wrapper">
+              <i data-lucide="lock-keyhole"></i>
+              <input type="password" id="account-password" required minlength="6" placeholder="At least 6 characters">
+            </div>
           </div>
-        </div>
-        <div class="dialog-actions">
-          <button type="button" class="secondary-btn" id="cancel-password-btn">Cancel</button>
-          <button type="submit" class="primary-btn" id="password-submit-btn">Save Password</button>
-        </div>
-      </form>
+          <div class="form-actions full-width">
+            <button type="button" class="secondary-btn" id="cancel-password-btn">Cancel</button>
+            <button type="submit" class="primary-btn" id="password-submit-btn">
+              <i data-lucide="save"></i> Save Password
+            </button>
+          </div>
+        </form>
+      </div>
     </dialog>
+    <div class="modal-backdrop" id="password-dialog-backdrop"></div>
 
-    <dialog class="glass-panel account-dialog" id="delete-account-dialog">
-      <div class="form-header">
-        <h3>Delete Account</h3>
-        <button type="button" class="icon-btn" id="close-account-delete-modal" aria-label="Close dialog">
-          <i data-lucide="x"></i>
-        </button>
-      </div>
-      <p class="dialog-copy">Deleting your account will permanently remove your FlickVault account and all stored media entries. This action cannot be undone.</p>
-      <div class="dialog-actions">
-        <button type="button" class="secondary-btn" id="cancel-account-delete-btn">Cancel</button>
-        <button type="button" class="secondary-btn danger-btn" id="confirm-account-delete-btn">Delete Account</button>
+    <dialog class="glass-modal modal-danger" id="delete-account-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Delete Account?</h2>
+          <button class="close-modal-btn" id="close-account-delete-modal" aria-label="Close dialog">
+            <i data-lucide="x"></i>
+          </button>
+        </div>
+        <div class="delete-confirm-body">
+          <div class="danger-icon">
+            <i data-lucide="triangle-alert"></i>
+          </div>
+          <p>Are you sure you want to permanently delete your <strong>FlickVault account</strong>?</p>
+          <p class="warning-text">This will erase all your vault entries, ratings, and reviews. This action <strong>cannot be undone</strong>.</p>
+        </div>
+        <div class="form-actions full-width">
+          <button type="button" class="secondary-btn" id="cancel-account-delete-btn">Cancel</button>
+          <button type="button" class="danger-btn" id="confirm-account-delete-btn">
+            <i data-lucide="trash-2"></i> Yes, Delete My Account
+          </button>
+        </div>
       </div>
     </dialog>
+    <div class="modal-backdrop" id="delete-account-dialog-backdrop"></div>
 
     <!-- Stats Dashboard Section -->
     <section class="stats-dashboard glass-panel vault-shell hidden">
