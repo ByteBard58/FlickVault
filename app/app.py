@@ -1,10 +1,11 @@
 import copy
 import json
+import logging
 from pathlib import Path
 from typing import Dict, List
 from uuid import UUID
 
-from fastapi import FastAPI, Query, Depends, Path as FastAPIPath, HTTPException
+from fastapi import FastAPI, Query, Depends, Path as FastAPIPath, HTTPException, Request
 from fastapi.responses import JSONResponse, FileResponse, PlainTextResponse, HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -27,6 +28,8 @@ from data.helpers import (
   update_data,
 )
 
+logger = logging.getLogger(__name__)
+
 def with_computed(values:List[Dict])-> List[Dict]:
   return [Item.model_validate(p).model_dump(mode="json") for p in values]
 
@@ -47,6 +50,15 @@ app.add_middleware(
 )
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
+
+
+@app.exception_handler(Exception)
+async def unhandled_exception_handler(request: Request, exc: Exception):
+  logger.exception("Unhandled error while serving %s", request.url.path)
+  return JSONResponse(
+    status_code=500,
+    content={"detail": "Internal server error"},
+  )
 
 
 @app.on_event("startup")

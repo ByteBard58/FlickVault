@@ -1,4 +1,5 @@
 import importlib.util
+from threading import Lock
 
 from app.config import get_env
 from sqlalchemy.engine import make_url
@@ -56,6 +57,8 @@ def _database_url() -> str:
 
 engine: Engine = create_engine(_database_url(), pool_pre_ping=True)
 metadata = MetaData()
+_init_lock = Lock()
+_initialized = False
 
 media_items = Table(
   "media_items",
@@ -76,4 +79,13 @@ media_items = Table(
 
 
 def init_database() -> None:
-  metadata.create_all(engine)
+  global _initialized
+  with _init_lock:
+    if _initialized:
+      return
+    metadata.create_all(engine)
+    _initialized = True
+
+
+def ensure_database_initialized() -> None:
+  init_database()

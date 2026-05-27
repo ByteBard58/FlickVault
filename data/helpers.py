@@ -4,7 +4,7 @@ from typing import Dict, List
 from fastapi import HTTPException
 from sqlalchemy import and_, insert, select, update
 
-from data.database import engine, media_items
+from data.database import ensure_database_initialized, engine, media_items
 
 
 def _row_to_dict(row) -> Dict:
@@ -19,6 +19,7 @@ def _row_to_dict(row) -> Dict:
 
 
 def process_data(user_id: str) -> List[Dict]:
+  ensure_database_initialized()
   query = (
     select(media_items)
     .where(media_items.c.user_id == user_id)
@@ -29,6 +30,7 @@ def process_data(user_id: str) -> List[Dict]:
 
 
 def add_data(value: Dict, user_id: str) -> Dict:
+  ensure_database_initialized()
   if _item_exists(user_id, value["imdb_id"]):
     raise HTTPException(
       status_code=422,
@@ -42,6 +44,7 @@ def add_data(value: Dict, user_id: str) -> Dict:
 
 
 def delete_data(imdb_id: str, user_id: str) -> Dict:
+  ensure_database_initialized()
   existing = _get_item(user_id, imdb_id)
   if not existing:
     raise HTTPException(
@@ -61,6 +64,7 @@ def delete_data(imdb_id: str, user_id: str) -> Dict:
 
 
 def update_data(imdb_id: str, value: Dict, user_id: str) -> None:
+  ensure_database_initialized()
   existing = _get_item(user_id, imdb_id)
   if not existing:
     raise HTTPException(
@@ -91,6 +95,7 @@ def update_data(imdb_id: str, value: Dict, user_id: str) -> None:
 
 
 def delete_all_user_data(user_id: str) -> int:
+    ensure_database_initialized()
     query = media_items.delete().where(media_items.c.user_id == user_id)
     with engine.begin() as connection:
         result = connection.execute(query)

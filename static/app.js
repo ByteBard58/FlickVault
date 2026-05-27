@@ -197,6 +197,26 @@ document.addEventListener('DOMContentLoaded', () => {
     return fetch(url, { ...options, headers });
   }
 
+  async function parseApiResponse(response, fallbackMessage) {
+    const text = await response.text();
+    let data = null;
+
+    if (text) {
+      try {
+        data = JSON.parse(text);
+      } catch {
+        data = { detail: text };
+      }
+    }
+
+    if (!response.ok) {
+      const message = data?.detail || data?.error || data?.message || fallbackMessage;
+      throw new Error(message);
+    }
+
+    return data || {};
+  }
+
   async function handleSignIn(e) {
     e.preventDefault();
     const email = authEmail.value.trim();
@@ -342,9 +362,7 @@ document.addEventListener('DOMContentLoaded', () => {
         render();
         return;
       }
-      if (!response.ok) throw new Error('Failed to load items.');
-      
-      const data = await response.json();
+      const data = await parseApiResponse(response, 'Failed to load items.');
       state.items = data.items || [];
       render();
     } catch (error) {
@@ -381,10 +399,7 @@ document.addEventListener('DOMContentLoaded', () => {
         body: JSON.stringify(payload)
       });
 
-      const result = await response.json();
-      if (!response.ok) {
-        throw new Error(result.detail || 'Failed to add media to the vault.');
-      }
+      await parseApiResponse(response, 'Failed to add media to the vault.');
 
       showToast(`Successfully added "${payload.title}"!`, 'success');
       resetAddForm();
@@ -420,10 +435,7 @@ document.addEventListener('DOMContentLoaded', () => {
         body: JSON.stringify(payload)
       });
 
-      const result = await response.json();
-      if (!response.ok) {
-        throw new Error(result.detail || 'Failed to update media.');
-      }
+      await parseApiResponse(response, 'Failed to update media.');
 
       showToast(`Successfully updated "${payload.title}"!`, 'success');
       editDialog.close();
@@ -441,10 +453,7 @@ document.addEventListener('DOMContentLoaded', () => {
         method: 'DELETE'
       });
 
-      const result = await response.json();
-      if (!response.ok) {
-        throw new Error(result.detail || 'Failed to delete media.');
-      }
+      await parseApiResponse(response, 'Failed to delete media.');
 
       showToast('Media successfully deleted from vault.', 'success');
       deleteDialog.close();
@@ -465,8 +474,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
 
       if (!response.ok) {
-        const result = await response.json();
-        throw new Error(result.detail || 'Failed to update watched status.');
+        await parseApiResponse(response, 'Failed to update watched status.');
       }
 
       showToast(`Marked "${title}" as watched!`, 'success');
