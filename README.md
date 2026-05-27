@@ -2,7 +2,7 @@
 
 FlickVault is a personal movie and TV show journal built with FastAPI and a vanilla HTML/CSS/JavaScript frontend. It lets you keep a small local vault of media you have watched or want to watch, including IMDb IDs, posters, ratings, comments, and release years.
 
-The app serves both a browser UI and a JSON API from the same FastAPI server.
+The app serves both a browser UI and an API from the same FastAPI server.
 
 ## ✨ Features
 
@@ -289,3 +289,11 @@ Add the same environment variables from `.env.example` in Render's Environment t
 ## 📄 License
 
 This project is licensed under the MIT License.
+
+## 😃 Appreciation
+
+Thank you for taking the time to assess my work. I hope you liked it and found it interesting. Please report any problems you notice in the `Issues` area.
+
+Don't hesitate to contact me if you have any queries, recommendations, or topics you would want to talk about. My [profile page](https://github.com/ByteBard58) has my contact details.
+
+Have a great day!
