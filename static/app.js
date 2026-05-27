@@ -7,10 +7,23 @@ document.addEventListener('DOMContentLoaded', () => {
     searchQuery: '',
     filterYear: '',
     sortBy: 'newest',
+    authReady: false,
   };
+
+  let authConfig = null;
+  let supabaseClient = null;
+  let currentSession = null;
 
   // --- Element Selectors ---
   const tabButtons = document.querySelectorAll('.tab-btn');
+  const vaultShells = document.querySelectorAll('.vault-shell');
+  const authPanel = document.getElementById('auth-panel');
+  const authForm = document.getElementById('auth-form');
+  const authEmail = document.getElementById('auth-email');
+  const authPassword = document.getElementById('auth-password');
+  const signUpBtn = document.getElementById('sign-up-btn');
+  const signOutBtn = document.getElementById('sign-out-btn');
+  const userEmail = document.getElementById('user-email');
   const panels = {
     list: document.getElementById('panel-list'),
     add: document.getElementById('panel-add'),
@@ -86,12 +99,130 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let activeDeleteImdbId = null;
 
+  // --- Authentication ---
+  async function loadAuthConfig() {
+    const response = await fetch('/config');
+    if (!response.ok) throw new Error('Failed to load authentication config.');
+    authConfig = await response.json();
+
+    if (!authConfig.auth_enabled) {
+      state.authReady = true;
+      showVault();
+      return;
+    }
+
+    if (!authConfig.supabase_url || !authConfig.supabase_anon_key) {
+      throw new Error('Supabase is not configured on the server.');
+    }
+
+    supabaseClient = window.supabase.createClient(
+      authConfig.supabase_url,
+      authConfig.supabase_anon_key
+    );
+
+    const { data, error } = await supabaseClient.auth.getSession();
+    if (error) throw error;
+    currentSession = data.session;
+
+    supabaseClient.auth.onAuthStateChange((_event, session) => {
+      currentSession = session;
+      applyAuthState();
+      if (session) fetchAllItems();
+    });
+
+    applyAuthState();
+  }
+
+  function applyAuthState() {
+    const signedIn = Boolean(currentSession);
+    state.authReady = signedIn;
+
+    if (signedIn) {
+      userEmail.textContent = currentSession.user?.email || '';
+      userEmail.classList.remove('hidden');
+      signOutBtn.classList.remove('hidden');
+      showVault();
+    } else {
+      state.items = [];
+      userEmail.classList.add('hidden');
+      signOutBtn.classList.add('hidden');
+      hideVault();
+    }
+  }
+
+  function showVault() {
+    authPanel.classList.add('hidden');
+    vaultShells.forEach(el => el.classList.remove('hidden'));
+  }
+
+  function hideVault() {
+    authPanel.classList.remove('hidden');
+    vaultShells.forEach(el => el.classList.add('hidden'));
+  }
+
+  async function getAccessToken() {
+    if (!authConfig?.auth_enabled) return null;
+    const { data, error } = await supabaseClient.auth.getSession();
+    if (error) throw error;
+    currentSession = data.session;
+    return currentSession?.access_token || null;
+  }
+
+  async function apiFetch(url, options = {}) {
+    const token = await getAccessToken();
+    const headers = new Headers(options.headers || {});
+
+    if (token) {
+      headers.set('Authorization', `Bearer ${token}`);
+    }
+
+    return fetch(url, { ...options, headers });
+  }
+
+  async function handleSignIn(e) {
+    e.preventDefault();
+    const email = authEmail.value.trim();
+    const password = authPassword.value;
+
+    try {
+      const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+      showToast('Signed in successfully.', 'success');
+    } catch (error) {
+      showToast(error.message, 'error');
+    }
+  }
+
+  async function handleSignUp() {
+    const email = authEmail.value.trim();
+    const password = authPassword.value;
+
+    try {
+      const { error } = await supabaseClient.auth.signUp({ email, password });
+      if (error) throw error;
+      showToast('Account created. Check your email if confirmation is enabled.', 'success');
+    } catch (error) {
+      showToast(error.message, 'error');
+    }
+  }
+
+  async function handleSignOut() {
+    try {
+      const { error } = await supabaseClient.auth.signOut();
+      if (error) throw error;
+      showToast('Signed out.', 'success');
+    } catch (error) {
+      showToast(error.message, 'error');
+    }
+  }
+
   // --- API Fetch Functions ---
   async function fetchAllItems() {
+    if (!state.authReady) return;
     showLoader();
     try {
       // Hitting search with no queries returns all items in the db
-      const response = await fetch('/search');
+      const response = await apiFetch('/search');
       if (response.status === 404) {
         state.items = [];
         render();
@@ -130,7 +261,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     try {
-      const response = await fetch('/add_item', {
+      const response = await apiFetch('/add_item', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -169,7 +300,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     try {
-      const response = await fetch(`/update_item/${imdbId}`, {
+      const response = await apiFetch(`/update_item/${imdbId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -192,7 +323,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!activeDeleteImdbId) return;
 
     try {
-      const response = await fetch(`/delete_item/${activeDeleteImdbId}`, {
+      const response = await apiFetch(`/delete_item/${activeDeleteImdbId}`, {
         method: 'DELETE'
       });
 
@@ -213,7 +344,7 @@ document.addEventListener('DOMContentLoaded', () => {
   async function quickToggleWatched(imdbId, title) {
     // Standard quick "Mark as Watched" sets watched=true, but since rating/comment are optional, we can just save it with no rating/comment
     try {
-      const response = await fetch(`/update_item/${imdbId}`, {
+      const response = await apiFetch(`/update_item/${imdbId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ watched: true })
@@ -756,6 +887,10 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // --- Event Listeners Wiring ---
+
+  authForm.addEventListener('submit', handleSignIn);
+  signUpBtn.addEventListener('click', handleSignUp);
+  signOutBtn.addEventListener('click', handleSignOut);
   
   // Tabs Navigation
   tabButtons.forEach(btn => {
@@ -880,7 +1015,13 @@ document.addEventListener('DOMContentLoaded', () => {
   async function init() {
     lucide.createIcons();
     resetAddForm();
-    await fetchAllItems();
+    try {
+      await loadAuthConfig();
+      if (state.authReady) await fetchAllItems();
+    } catch (error) {
+      hideVault();
+      showToast(error.message, 'error');
+    }
   }
 
   init();

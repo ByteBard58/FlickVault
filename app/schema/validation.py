@@ -40,7 +40,7 @@ class Item(BaseModel):
 
   @computed_field
   @property
-  def imdb_link(self) -> AnyUrl:
+  def imdb_link(self) -> str:
     imdb_id = self.imdb_id
     return f"https://www.imdb.com/title/{imdb_id}/"
 

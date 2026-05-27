@@ -4,7 +4,9 @@ from uuid import UUID
 from fastapi import FastAPI, Query, Depends, Path, HTTPException
 from fastapi.responses import JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
+from app.auth import get_current_user, public_auth_config
 from app.schema.validation import Item, ItemUpdate
+from data.database import init_database
 from data.helpers import process_data, add_data, delete_data, update_data
 
 def with_computed(values:List[Dict])-> List[Dict]:
@@ -14,9 +16,18 @@ app = FastAPI(title="FlickVault",version="1.0")
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
+
+@app.on_event("startup")
+def startup():
+  init_database()
+
 @app.get("/")
 def home():
   return FileResponse("static/index.html")
+
+@app.get("/config")
+def get_config():
+  return public_auth_config()
 
 @app.get("/search")
 def search_with_queries(
@@ -33,9 +44,9 @@ def search_with_queries(
   watched:bool = Query(
     default=None, description="`True` if already watched, otherwise `False`"
   ),
-  dep = Depends(process_data)
+  user_id: str = Depends(get_current_user)
 ):
-  result = with_computed(dep)
+  result = with_computed(process_data(user_id))
 
   if imdb_id:
     result = [r for r in result if r["imdb_id"] == imdb_id]
@@ -59,9 +70,9 @@ def search_with_queries(
 
 @app.get("/watchlist")
 def get_watchlist(
-  dep = Depends(process_data)
+  user_id: str = Depends(get_current_user)
 ):
-  result = with_computed(dep)
+  result = with_computed(process_data(user_id))
   result = [r for r in result if not r["watched"]]
   content = {
     "items_found":len(result),
@@ -71,9 +82,9 @@ def get_watchlist(
 
 @app.get("/watchedlist")
 def get_watchedlist(
-  dep = Depends(process_data)
+  user_id: str = Depends(get_current_user)
 ):
-  result = with_computed(dep)
+  result = with_computed(process_data(user_id))
   result = [r for r in result if r["watched"]]
   content = {
     "items_found":len(result),
@@ -84,9 +95,9 @@ def get_watchedlist(
 @app.get("/item_uuid/{uuid}")
 def get_item_by_uuid(uuid:UUID = Path(
   description="UUID of the media"
-), dep = Depends(process_data)):
+), user_id: str = Depends(get_current_user)):
   
-  result = with_computed(dep)
+  result = with_computed(process_data(user_id))
   result = [r for r in result if r["uuid"] == str(uuid)]
   if not result:
     raise HTTPException(status_code=404,detail=f"No item found with UUID = {uuid} ")
@@ -95,17 +106,17 @@ def get_item_by_uuid(uuid:UUID = Path(
 @app.get("/item_id/{imdb_id}")
 def get_item_by_imdb_id(imdb_id:str = Path(
   description="IMDB ID of the media", examples=["tt2543164"], pattern=r"^tt\d{7,10}$"
-), dep = Depends(process_data)):
-  result = with_computed(dep)
+), user_id: str = Depends(get_current_user)):
+  result = with_computed(process_data(user_id))
   result = [r for r in result if r["imdb_id"] == imdb_id]
   if not result:
     raise HTTPException(status_code=404,detail=f"No item found with IMDB ID = {imdb_id} ")
   return JSONResponse(status_code=200, content=result)
 
 @app.post("/add_item",status_code=201)
-def add_item(payload:Item):
+def add_item(payload:Item, user_id: str = Depends(get_current_user)):
   payload:dict = payload.model_dump(mode="json")
-  dickt = add_data(payload)
+  dickt = add_data(payload, user_id)
 
   content = {"status":"Addition Successful", "added_item":dickt}
   return JSONResponse(status_code=201, content=content)
@@ -113,16 +124,16 @@ def add_item(payload:Item):
 @app.delete("/delete_item/{imdb_id}")
 def delete_item_by_imdb_id(imdb_id:str = Path(
   description="IMDB ID of the media", examples=["tt2543164"], pattern=r"^tt\d{7,10}$"
-)):
-  dickt = delete_data(imdb_id)
+), user_id: str = Depends(get_current_user)):
+  dickt = delete_data(imdb_id, user_id)
   content = {"status":"Deletion Successful", "deleted_item":dickt}
   return JSONResponse(status_code=200, content=content)
 
 @app.put("/update_item/{imdb_id}")
 def update_item_by_imdb_id(value:ItemUpdate,imdb_id:str = Path(
   description="IMDB ID of the media", examples=["tt2543164"], pattern=r"^tt\d{7,10}$"
-),dep = Depends(process_data)):
-  whole:List[Dict] = with_computed(dep)
+), user_id: str = Depends(get_current_user)):
+  whole:List[Dict] = with_computed(process_data(user_id))
   existing_list = [r for r in whole if r["imdb_id"] == imdb_id]
   if not existing_list:
     raise HTTPException(
@@ -138,7 +149,7 @@ def update_item_by_imdb_id(value:ItemUpdate,imdb_id:str = Path(
     else:
       existing[key_inc] = val_inc
   existing = Item.model_validate(existing).model_dump(mode="json")
-  update_data(existing)
+  update_data(imdb_id, existing, user_id)
 
   content = {
     "status":"Update Successful",
