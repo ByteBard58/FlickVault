@@ -1,9 +1,9 @@
 {
-  "projectSettings": {
-    "pythonVersion": "3.11"
+  "functions": {
+    "api/index.py": {
+      "runtime": "python3.11"
+    }
   },
-  "buildCommand": "pip install -r requirements.txt",
-  "outputDirectory": ".",
   "rewrites": [
     {
       "source": "/api/(.*)",
