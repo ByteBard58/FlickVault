@@ -115,3 +115,66 @@ def get_current_user(
   if not user_id:
     raise HTTPException(status_code=401, detail="Invalid authentication token")
   return user_id
+
+
+def get_current_user_token(
+  credentials: HTTPAuthorizationCredentials = Depends(security),
+) -> str:
+  if not auth_enabled():
+    raise HTTPException(status_code=400, detail="Authentication is disabled")
+
+  if credentials is None:
+    raise HTTPException(status_code=401, detail="Missing authentication token")
+
+  return credentials.credentials
+
+
+def _supabase_auth_headers(token: str) -> dict:
+  supabase_url = get_env("SUPABASE_URL")
+  supabase_key = get_env("SUPABASE_ANON_KEY", "SUPABASE_KEY")
+
+  if not supabase_url or not supabase_key:
+    raise HTTPException(status_code=500, detail="Supabase auth is not configured")
+
+  return {
+    "Authorization": f"Bearer {token}",
+    "apikey": supabase_key,
+    "Content-Type": "application/json",
+  }
+
+
+def change_user_password(token: str, new_password: str) -> None:
+  supabase_url = get_env("SUPABASE_URL")
+  if not supabase_url:
+    raise HTTPException(status_code=500, detail="SUPABASE_URL is not configured")
+
+  try:
+    response = httpx.patch(
+      f"{supabase_url.rstrip('/')}/auth/v1/user",
+      headers=_supabase_auth_headers(token),
+      json={"password": new_password},
+      timeout=10,
+    )
+  except httpx.HTTPError as exc:
+    raise HTTPException(status_code=500, detail=f"Could not update password: {exc}")
+
+  if response.status_code not in {200, 204}:
+    raise HTTPException(status_code=response.status_code, detail=response.text or "Unable to update password")
+
+
+def delete_user_account(token: str) -> None:
+  supabase_url = get_env("SUPABASE_URL")
+  if not supabase_url:
+    raise HTTPException(status_code=500, detail="SUPABASE_URL is not configured")
+
+  try:
+    response = httpx.delete(
+      f"{supabase_url.rstrip('/')}/auth/v1/user",
+      headers=_supabase_auth_headers(token),
+      timeout=10,
+    )
+  except httpx.HTTPError as exc:
+    raise HTTPException(status_code=500, detail=f"Could not delete account: {exc}")
+
+  if response.status_code not in {200, 202, 204}:
+    raise HTTPException(status_code=response.status_code, detail=response.text or "Unable to delete account")

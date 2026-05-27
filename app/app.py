@@ -4,10 +4,22 @@ from uuid import UUID
 from fastapi import FastAPI, Query, Depends, Path, HTTPException
 from fastapi.responses import JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
-from app.auth import get_current_user, public_auth_config
-from app.schema.validation import Item, ItemUpdate
+from app.auth import (
+  get_current_user,
+  get_current_user_token,
+  public_auth_config,
+  change_user_password,
+  delete_user_account,
+)
+from app.schema.validation import Item, ItemUpdate, PasswordUpdate
 from data.database import init_database
-from data.helpers import process_data, add_data, delete_data, update_data
+from data.helpers import (
+  process_data,
+  add_data,
+  delete_data,
+  delete_all_user_data,
+  update_data,
+)
 
 def with_computed(values:List[Dict])-> List[Dict]:
   return [Item.model_validate(p).model_dump(mode="json") for p in values]
@@ -157,3 +169,31 @@ def update_item_by_imdb_id(value:ItemUpdate,imdb_id:str = Path(
     "after_update": existing
   }
   return JSONResponse(status_code=200, content=content)
+
+
+@app.patch("/account/password")
+def change_password(
+  payload: PasswordUpdate,
+  token: str = Depends(get_current_user_token),
+):
+  change_user_password(token, payload.password)
+  return JSONResponse(
+    status_code=200,
+    content={"status": "Password updated successfully"},
+  )
+
+
+@app.delete("/account")
+def delete_account(
+  token: str = Depends(get_current_user_token),
+  user_id: str = Depends(get_current_user),
+):
+  delete_user_account(token)
+  removed = delete_all_user_data(user_id)
+  return JSONResponse(
+    status_code=200,
+    content={
+      "status": "Account deleted successfully",
+      "removed_items": removed,
+    },
+  )

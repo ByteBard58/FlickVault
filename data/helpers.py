@@ -90,6 +90,13 @@ def update_data(imdb_id: str, value: Dict, user_id: str) -> None:
     connection.execute(query)
 
 
+def delete_all_user_data(user_id: str) -> int:
+  query = media_items.delete().where(media_items.c.user_id == user_id)
+  with engine.begin() as connection:
+    result = connection.execute(query)
+  return int(result.rowcount or 0)
+
+
 def _get_item(user_id: str, imdb_id: str) -> Dict | None:
   query = select(media_items).where(
     and_(
