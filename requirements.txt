@@ -14,7 +14,7 @@ idna==3.16
 jwt==1.4.0
 MarkupSafe==3.0.3
 packaging==26.2
-psycopg==3.3.4
+psycopg2-binary==2.9.11
 pycparser==3.0
 pydantic==2.13.4
 pydantic_core==2.46.4

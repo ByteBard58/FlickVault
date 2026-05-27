@@ -1,3 +1,5 @@
+import importlib.util
+
 from app.config import get_env
 from sqlalchemy.engine import make_url
 from sqlalchemy import (
@@ -16,14 +18,35 @@ from sqlalchemy import (
 from sqlalchemy.engine import Engine
 
 
+def _postgres_driver() -> str:
+  if importlib.util.find_spec("psycopg") is not None:
+    return "psycopg"
+  if importlib.util.find_spec("psycopg2") is not None:
+    return "psycopg2"
+  raise RuntimeError(
+    "No PostgreSQL driver is installed. Run `pip install -r requirements.txt`."
+  )
+
+
 def _database_url() -> str:
   url = get_env("DATABASE_URL", default="sqlite:///./flickvault.db")
-  if url.startswith("postgres://"):
-    url = url.replace("postgres://", "postgresql+psycopg://", 1)
-  if url.startswith("postgresql://"):
-    url = url.replace("postgresql://", "postgresql+psycopg://", 1)
-  if not url.startswith("postgresql+psycopg://"):
+  if not (
+    url.startswith("postgres://")
+    or url.startswith("postgresql://")
+    or url.startswith("postgresql+psycopg://")
+    or url.startswith("postgresql+psycopg2://")
+  ):
     return url
+
+  driver = _postgres_driver()
+  if url.startswith("postgres://"):
+    url = url.replace("postgres://", f"postgresql+{driver}://", 1)
+  if url.startswith("postgresql://"):
+    url = url.replace("postgresql://", f"postgresql+{driver}://", 1)
+  if url.startswith("postgresql+psycopg://"):
+    url = url.replace("postgresql+psycopg://", f"postgresql+{driver}://", 1)
+  if url.startswith("postgresql+psycopg2://"):
+    url = url.replace("postgresql+psycopg2://", f"postgresql+{driver}://", 1)
 
   parsed = make_url(url)
   query = dict(parsed.query)
