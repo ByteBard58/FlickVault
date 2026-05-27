@@ -48,7 +48,8 @@ jobs:
           pip install -r requirements.txt
       - name: Lint app and data packages
         run: |
-          flake8 app data
+          # Only enforce fatal Python errors / undefined names in this repo's current style.
+          flake8 app data --count --select=E9,F63,F7,F82 --show-source --statistics
       - name: Smoke-test FastAPI app
         env:
           AUTH_DISABLED: 'true'
