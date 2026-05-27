@@ -1,6 +1,7 @@
 import os
 from typing import Dict, List
 
+import httpx
 from fastapi import Depends, HTTPException
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
@@ -65,9 +66,39 @@ def _decode_token(token: str) -> Dict:
       audience=os.getenv("SUPABASE_JWT_AUDIENCE", "authenticated"),
     )
   except jwt.PyJWTError:
-    raise HTTPException(status_code=401, detail="Invalid authentication token")
+    return _fetch_supabase_user(token)
   except Exception as exc:
-    raise HTTPException(status_code=500, detail=f"Authentication is not configured correctly: {exc}")
+    return _fetch_supabase_user(token, fallback_error=exc)
+
+
+def _fetch_supabase_user(token: str, fallback_error: Exception | None = None) -> Dict:
+  supabase_url = get_env("SUPABASE_URL")
+  supabase_key = get_env("SUPABASE_ANON_KEY", "SUPABASE_KEY")
+
+  if not supabase_url or not supabase_key:
+    if fallback_error:
+      raise HTTPException(
+        status_code=500,
+        detail=f"Authentication is not configured correctly: {fallback_error}",
+      )
+    raise HTTPException(status_code=500, detail="Supabase auth is not configured")
+
+  try:
+    response = httpx.get(
+      f"{supabase_url.rstrip('/')}/auth/v1/user",
+      headers={
+        "apikey": supabase_key,
+        "Authorization": f"Bearer {token}",
+      },
+      timeout=10,
+    )
+  except httpx.HTTPError as exc:
+    raise HTTPException(status_code=500, detail=f"Could not validate authentication token: {exc}")
+
+  if response.status_code != 200:
+    raise HTTPException(status_code=401, detail="Invalid authentication token")
+
+  return response.json()
 
 
 def get_current_user(
@@ -80,7 +111,7 @@ def get_current_user(
     raise HTTPException(status_code=401, detail="Missing authentication token")
 
   payload = _decode_token(credentials.credentials)
-  user_id = payload.get("sub")
+  user_id = payload.get("sub") or payload.get("id")
   if not user_id:
     raise HTTPException(status_code=401, detail="Invalid authentication token")
   return user_id

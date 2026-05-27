@@ -1,4 +1,5 @@
 from app.config import get_env
+from sqlalchemy.engine import make_url
 from sqlalchemy import (
   Boolean,
   Column,
@@ -18,10 +19,16 @@ from sqlalchemy.engine import Engine
 def _database_url() -> str:
   url = get_env("DATABASE_URL", default="sqlite:///./flickvault.db")
   if url.startswith("postgres://"):
-    return url.replace("postgres://", "postgresql+psycopg://", 1)
+    url = url.replace("postgres://", "postgresql+psycopg://", 1)
   if url.startswith("postgresql://"):
-    return url.replace("postgresql://", "postgresql+psycopg://", 1)
-  return url
+    url = url.replace("postgresql://", "postgresql+psycopg://", 1)
+  if not url.startswith("postgresql+psycopg://"):
+    return url
+
+  parsed = make_url(url)
+  query = dict(parsed.query)
+  query.pop("pgbouncer", None)
+  return parsed.set(query=query).render_as_string(hide_password=False)
 
 
 engine: Engine = create_engine(_database_url(), pool_pre_ping=True)
