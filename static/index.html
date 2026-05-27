@@ -37,6 +37,12 @@
       </div>
       <div class="header-actions">
         <span class="user-email hidden" id="user-email"></span>
+        <button type="button" class="api-btn hidden" id="change-password-btn">
+          <i data-lucide="key"></i> Change Password
+        </button>
+        <button type="button" class="api-btn hidden danger-btn" id="delete-account-btn">
+          <i data-lucide="trash-2"></i> Delete Account
+        </button>
         <button type="button" class="api-btn hidden" id="sign-out-btn">
           <i data-lucide="log-out"></i> Sign Out
         </button>
@@ -78,6 +84,42 @@
         </div>
       </form>
     </section>
+
+    <dialog class="glass-panel account-dialog" id="password-dialog">
+      <form id="password-form" class="account-form" method="dialog">
+        <div class="form-header">
+          <h3>Change Password</h3>
+          <button type="button" class="icon-btn" id="close-password-modal" aria-label="Close dialog">
+            <i data-lucide="x"></i>
+          </button>
+        </div>
+        <div class="form-group full-width">
+          <label for="account-password">New Password</label>
+          <div class="input-wrapper">
+            <i data-lucide="key-round"></i>
+            <input type="password" id="account-password" required minlength="6" placeholder="Enter new password">
+          </div>
+        </div>
+        <div class="dialog-actions">
+          <button type="button" class="secondary-btn" id="cancel-password-btn">Cancel</button>
+          <button type="submit" class="primary-btn" id="password-submit-btn">Save Password</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog class="glass-panel account-dialog" id="delete-account-dialog">
+      <div class="form-header">
+        <h3>Delete Account</h3>
+        <button type="button" class="icon-btn" id="close-account-delete-modal" aria-label="Close dialog">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <p class="dialog-copy">Deleting your account will permanently remove your FlickVault account and all stored media entries. This action cannot be undone.</p>
+      <div class="dialog-actions">
+        <button type="button" class="secondary-btn" id="cancel-account-delete-btn">Cancel</button>
+        <button type="button" class="secondary-btn danger-btn" id="confirm-account-delete-btn">Delete Account</button>
+      </div>
+    </dialog>
 
     <!-- Stats Dashboard Section -->
     <section class="stats-dashboard glass-panel vault-shell hidden">

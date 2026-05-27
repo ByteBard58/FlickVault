@@ -532,6 +532,51 @@ body {
   color: white;
 }
 
+.account-dialog {
+  width: min(92vw, 420px);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+}
+
+.account-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.account-form .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+
+.icon-btn {
+  border: none;
+  background: transparent;
+  color: var(--text-main);
+  cursor: pointer;
+  padding: 0.25rem;
+  margin-left: auto;
+}
+
+.danger-btn {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.2);
+  color: var(--accent-rose);
+}
+
+.danger-btn:hover {
+  background: rgba(239, 68, 68, 0.16);
+}
+
 .hidden {
   display: none !important;
 }

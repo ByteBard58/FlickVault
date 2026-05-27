@@ -23,6 +23,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const authPassword = document.getElementById('auth-password');
   const signUpBtn = document.getElementById('sign-up-btn');
   const signOutBtn = document.getElementById('sign-out-btn');
+  const changePasswordBtn = document.getElementById('change-password-btn');
+  const deleteAccountBtn = document.getElementById('delete-account-btn');
   const userEmail = document.getElementById('user-email');
   const panels = {
     list: document.getElementById('panel-list'),
@@ -94,6 +96,17 @@ document.addEventListener('DOMContentLoaded', () => {
   const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
   const closeDeleteModal = document.getElementById('close-delete-modal');
   const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
+
+  const passwordDialog = document.getElementById('password-dialog');
+  const passwordForm = document.getElementById('password-form');
+  const accountPasswordInput = document.getElementById('account-password');
+  const closePasswordModal = document.getElementById('close-password-modal');
+  const cancelPasswordBtn = document.getElementById('cancel-password-btn');
+
+  const deleteAccountDialog = document.getElementById('delete-account-dialog');
+  const confirmAccountDeleteBtn = document.getElementById('confirm-account-delete-btn');
+  const closeAccountDeleteModal = document.getElementById('close-account-delete-modal');
+  const cancelAccountDeleteBtn = document.getElementById('cancel-account-delete-btn');
   
   const toastContainer = document.getElementById('toast-container');
 
@@ -141,11 +154,15 @@ document.addEventListener('DOMContentLoaded', () => {
       userEmail.textContent = currentSession.user?.email || '';
       userEmail.classList.remove('hidden');
       signOutBtn.classList.remove('hidden');
+      changePasswordBtn.classList.remove('hidden');
+      deleteAccountBtn.classList.remove('hidden');
       showVault();
     } else {
       state.items = [];
       userEmail.classList.add('hidden');
       signOutBtn.classList.add('hidden');
+      changePasswordBtn.classList.add('hidden');
+      deleteAccountBtn.classList.add('hidden');
       hideVault();
     }
   }
@@ -211,6 +228,66 @@ document.addEventListener('DOMContentLoaded', () => {
       const { error } = await supabaseClient.auth.signOut();
       if (error) throw error;
       showToast('Signed out.', 'success');
+    } catch (error) {
+      showToast(error.message, 'error');
+    }
+  }
+
+  function openPasswordDialog() {
+    if (!passwordDialog) return;
+    accountPasswordInput.value = '';
+    passwordDialog.showModal();
+  }
+
+  function openDeleteAccountDialog() {
+    if (!deleteAccountDialog) return;
+    deleteAccountDialog.showModal();
+  }
+
+  async function handleChangePassword(e) {
+    e.preventDefault();
+    const newPassword = accountPasswordInput.value.trim();
+
+    if (newPassword.length < 6) {
+      showToast('Password must be at least 6 characters.', 'error');
+      return;
+    }
+
+    try {
+      const response = await apiFetch('/account/password', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ password: newPassword }),
+      });
+
+      if (!response.ok) {
+        const text = await response.text();
+        throw new Error(text || 'Unable to update password.');
+      }
+
+      passwordDialog.close();
+      showToast('Password updated successfully.', 'success');
+    } catch (error) {
+      showToast(error.message, 'error');
+    }
+  }
+
+  async function handleDeleteAccount() {
+    try {
+      const response = await apiFetch('/account', {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        const text = await response.text();
+        throw new Error(text || 'Unable to delete account.');
+      }
+
+      if (deleteAccountDialog) deleteAccountDialog.close();
+      await handleSignOut();
+      showToast('Account deleted successfully.', 'success');
     } catch (error) {
       showToast(error.message, 'error');
     }
@@ -891,6 +968,14 @@ document.addEventListener('DOMContentLoaded', () => {
   authForm.addEventListener('submit', handleSignIn);
   signUpBtn.addEventListener('click', handleSignUp);
   signOutBtn.addEventListener('click', handleSignOut);
+  changePasswordBtn.addEventListener('click', openPasswordDialog);
+  deleteAccountBtn.addEventListener('click', openDeleteAccountDialog);
+  passwordForm.addEventListener('submit', handleChangePassword);
+  closePasswordModal.addEventListener('click', () => passwordDialog.close());
+  cancelPasswordBtn.addEventListener('click', () => passwordDialog.close());
+  closeAccountDeleteModal.addEventListener('click', () => deleteAccountDialog.close());
+  cancelAccountDeleteBtn.addEventListener('click', () => deleteAccountDialog.close());
+  confirmAccountDeleteBtn.addEventListener('click', handleDeleteAccount);
   
   // Tabs Navigation
   tabButtons.forEach(btn => {
