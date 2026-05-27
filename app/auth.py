@@ -159,7 +159,17 @@ def change_user_password(token: str, new_password: str) -> None:
     raise HTTPException(status_code=500, detail=f"Could not update password: {exc}")
 
   if response.status_code not in {200, 204}:
-    raise HTTPException(status_code=response.status_code, detail=response.text or "Unable to update password")
+    detail = None
+    try:
+      payload = response.json()
+      detail = payload.get("message") or payload.get("error") or payload.get("detail") or str(payload)
+    except ValueError:
+      detail = response.text
+
+    raise HTTPException(
+      status_code=response.status_code,
+      detail=detail or "Unable to update password",
+    )
 
 
 def delete_user_account(token: str) -> None:

@@ -279,23 +279,35 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     try {
-      const response = await apiFetch('/account/password', {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ password: newPassword }),
-      });
+      if (authConfig?.auth_enabled && supabaseClient) {
+        const { data, error } = await supabaseClient.auth.updateUser({ password: newPassword });
+        if (error) throw error;
+      } else {
+        const response = await apiFetch('/account/password', {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ password: newPassword }),
+        });
 
-      if (!response.ok) {
-        const text = await response.text();
-        throw new Error(text || 'Unable to update password.');
+        if (!response.ok) {
+          const text = await response.text();
+          let message = text || 'Unable to update password.';
+          try {
+            const json = JSON.parse(text);
+            message = json.detail || json.error || json.message || message;
+          } catch {
+            // ignore non-JSON error response
+          }
+          throw new Error(message);
+        }
       }
 
       closePasswordDialog();
       showToast('Password updated successfully.', 'success');
     } catch (error) {
-      showToast(error.message, 'error');
+      showToast(error?.message || String(error) || 'Unable to update password.', 'error');
     }
   }
 
