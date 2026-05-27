@@ -28,4 +28,5 @@ scaler.pkl
 instance/
 shit/
 *.db
+requirements-dev.txt
 .vscode/
