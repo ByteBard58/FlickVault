@@ -21,7 +21,8 @@ The app serves both a browser UI and a JSON API from the same FastAPI server.
 
 - **Backend:** FastAPI, Pydantic
 - **Frontend:** HTML, CSS, vanilla JavaScript
-- **Storage:** Local JSON file at `data/db.json`
+- **Storage:** PostgreSQL through SQLAlchemy, with a local SQLite fallback
+- **Auth:** Supabase Auth JWTs verified by FastAPI
 - **Server:** Uvicorn
 
 ## 📁 Project Structure
@@ -33,8 +34,9 @@ FlickVault/
 │   └── schema/
 │       └── validation.py       # Pydantic models and validation rules
 ├── data/
-│   ├── db.json                 # Local media database
-│   └── helpers.py              # JSON load/save helpers
+│   ├── database.py             # SQLAlchemy database setup
+│   ├── db.json                 # Legacy local seed/reference data
+│   └── helpers.py              # Database helpers
 ├── static/
 │   ├── index.html              # Main frontend page
 │   ├── style.css               # Frontend styles
@@ -74,17 +76,23 @@ On Windows:
 pip install -r requirements.txt
 ```
 
-### 4. Prepare the database file (Optional)
+### 4. Configure environment
 
-The app expects a writable JSON file at `data/db.json`. So, there is an existing `data/db.json` file with some pre-listed items for convenience.
+For local no-auth development, you can use the default SQLite database:
 
-To start with an empty vault, delete the existing one and create `data/db.json` with an empty JSON array:
-
-```json
-[]
+```bash
+export AUTH_DISABLED=true
 ```
 
-You can also seed it manually with any valid media items that match the data model below.
+For cloud deployment, copy `.env.example` into your hosting provider's environment variables and set:
+
+- `DATABASE_URL`: Supabase PostgreSQL connection string
+- `SUPABASE_URL`: Supabase project URL
+- `SUPABASE_ANON_KEY`: Supabase public anon key
+- `SUPABASE_JWT_AUDIENCE`: usually `authenticated`
+- `SUPABASE_JWT_ALGORITHMS`: usually `RS256,ES256`
+
+The app creates the required table on startup. You can also run `supabase_schema.sql` in the Supabase SQL editor.
 
 ### 5. Run the app
 
@@ -239,9 +247,36 @@ The API also computes an `imdb_link` field from the IMDb ID when returning items
 
 ## 📝 Notes
 
-- This project uses `data/db.json` as a simple local database. It is easy to inspect and edit, but it is not designed for concurrent writes or production-scale persistence.
+- This project stores vault items in SQL and scopes every record by authenticated user ID.
+- `data/db.json` is kept only as legacy seed/reference data.
 - The frontend loads Lucide icons and Google Fonts from CDNs, so those assets require an internet connection.
 - FastAPI exposes interactive API documentation at `/docs` and OpenAPI JSON at `/openapi.json`.
+
+## ☁️ Deployment
+
+### Supabase
+
+1. Create a Supabase project.
+2. Copy the pooled PostgreSQL connection string into `DATABASE_URL`.
+3. Copy the project URL into `SUPABASE_URL`.
+4. Copy the public anon key into `SUPABASE_ANON_KEY`.
+5. Run `supabase_schema.sql` in the SQL editor, or let the app create the table on first startup.
+
+### Render
+
+Create a Web Service with this build command:
+
+```bash
+pip install -r requirements.txt
+```
+
+Use this start command:
+
+```bash
+uvicorn app.app:app --host 0.0.0.0 --port $PORT
+```
+
+Add the same environment variables from `.env.example` in Render's Environment tab.
 
 ## 📄 License
 

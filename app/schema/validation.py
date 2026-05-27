@@ -40,7 +40,7 @@ class Item(BaseModel):
 
   @computed_field
   @property
-  def imdb_link(self) -> AnyUrl:
+  def imdb_link(self) -> str:
     imdb_id = self.imdb_id
     return f"https://www.imdb.com/title/{imdb_id}/"
 
@@ -89,3 +89,10 @@ class ItemUpdate(BaseModel):
     if self.watched is False and (self.rating is not None or self.comment is not None):
       raise ValueError("`watched` is `false` but got `rating` or `comment`, expected `None` for both")
     return self
+
+
+class PasswordUpdate(BaseModel):
+  password: Annotated[str, Field(
+    ..., description="New password for the authenticated user",
+    min_length=6,
+  )]

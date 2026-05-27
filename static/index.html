@@ -10,6 +10,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Supabase Auth Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <!-- CSS Stylesheet -->
   <link rel="stylesheet" href="/static/style.css">
 </head>
@@ -34,14 +36,113 @@
         </div>
       </div>
       <div class="header-actions">
+        <span class="user-email hidden" id="user-email"></span>
+        <div class="account-action-group hidden" id="account-action-group">
+          <button type="button" class="header-icon-btn" id="change-password-btn" aria-label="Change Password">
+            <i data-lucide="key-round"></i>
+            <span class="btn-tooltip">Change Password</span>
+          </button>
+          <button type="button" class="header-icon-btn header-icon-btn--danger" id="delete-account-btn" aria-label="Delete Account">
+            <i data-lucide="user-x"></i>
+            <span class="btn-tooltip">Delete Account</span>
+          </button>
+        </div>
+        <button type="button" class="secondary-btn hidden" id="sign-out-btn">
+          <i data-lucide="log-out"></i> Sign Out
+        </button>
         <a href="/docs" target="_blank" class="api-btn">
           <i data-lucide="terminal"></i> API Docs
         </a>
       </div>
     </header>
 
+    <!-- Authentication Gate -->
+    <section class="auth-panel glass-panel" id="auth-panel">
+      <div class="auth-copy">
+        <span class="preview-badge"><i data-lucide="lock-keyhole"></i> Private Vault</span>
+        <h2>Sign in to your FlickVault</h2>
+        <p>Your movies and shows are stored per account, so the same vault follows you across devices.</p>
+      </div>
+      <form id="auth-form" class="auth-form" novalidate>
+        <div class="form-group full-width">
+          <label for="auth-email">Email</label>
+          <div class="input-wrapper">
+            <i data-lucide="mail"></i>
+            <input type="email" id="auth-email" required placeholder="you@example.com">
+          </div>
+        </div>
+        <div class="form-group full-width">
+          <label for="auth-password">Password</label>
+          <div class="input-wrapper">
+            <i data-lucide="key-round"></i>
+            <input type="password" id="auth-password" required minlength="6" placeholder="At least 6 characters">
+          </div>
+        </div>
+        <div class="auth-actions">
+          <button type="submit" class="primary-btn" id="sign-in-btn">
+            <i data-lucide="log-in"></i> Sign In
+          </button>
+          <button type="button" class="secondary-btn" id="sign-up-btn">
+            <i data-lucide="user-plus"></i> Create Account
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <dialog class="glass-modal" id="password-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2><i data-lucide="key-round"></i>Change Password</h2>
+          <button class="close-modal-btn" id="close-password-modal" aria-label="Close dialog">
+            <i data-lucide="x"></i>
+          </button>
+        </div>
+        <form id="password-form" novalidate>
+          <div class="form-group full-width">
+            <label for="account-password">New Password</label>
+            <div class="input-wrapper">
+              <i data-lucide="lock-keyhole"></i>
+              <input type="password" id="account-password" required minlength="6" placeholder="At least 6 characters">
+            </div>
+          </div>
+          <div class="form-actions full-width">
+            <button type="button" class="secondary-btn" id="cancel-password-btn">Cancel</button>
+            <button type="submit" class="primary-btn" id="password-submit-btn">
+              <i data-lucide="save"></i> Save Password
+            </button>
+          </div>
+        </form>
+      </div>
+    </dialog>
+    <div class="modal-backdrop" id="password-dialog-backdrop"></div>
+
+    <dialog class="glass-modal modal-danger" id="delete-account-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Delete Account?</h2>
+          <button class="close-modal-btn" id="close-account-delete-modal" aria-label="Close dialog">
+            <i data-lucide="x"></i>
+          </button>
+        </div>
+        <div class="delete-confirm-body">
+          <div class="danger-icon">
+            <i data-lucide="triangle-alert"></i>
+          </div>
+          <p>Are you sure you want to permanently delete your <strong>FlickVault account</strong>?</p>
+          <p class="warning-text">This will erase all your vault entries, ratings, and reviews. This action <strong>cannot be undone</strong>.</p>
+        </div>
+        <div class="form-actions full-width">
+          <button type="button" class="secondary-btn" id="cancel-account-delete-btn">Cancel</button>
+          <button type="button" class="danger-btn" id="confirm-account-delete-btn">
+            <i data-lucide="trash-2"></i> Yes, Delete My Account
+          </button>
+        </div>
+      </div>
+    </dialog>
+    <div class="modal-backdrop" id="delete-account-dialog-backdrop"></div>
+
     <!-- Stats Dashboard Section -->
-    <section class="stats-dashboard glass-panel">
+    <section class="stats-dashboard glass-panel vault-shell hidden">
       <div class="stat-card">
         <div class="stat-icon icon-purple">
           <i data-lucide="clapperboard"></i>
@@ -87,7 +188,7 @@
     </section>
 
     <!-- Tab Navigation -->
-    <nav class="tab-navigation glass-panel">
+    <nav class="tab-navigation glass-panel vault-shell hidden">
       <button class="tab-btn active" data-tab="all">
         <i data-lucide="database"></i> All Vault
       </button>
@@ -103,7 +204,7 @@
     </nav>
 
     <!-- Main Content Panels -->
-    <main class="content-container">
+    <main class="content-container vault-shell hidden">
 
       <!-- View & Edit Section (for lists) -->
       <div id="panel-list" class="tab-panel active">

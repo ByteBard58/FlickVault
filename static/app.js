@@ -7,10 +7,26 @@ document.addEventListener('DOMContentLoaded', () => {
     searchQuery: '',
     filterYear: '',
     sortBy: 'newest',
+    authReady: false,
   };
+
+  let authConfig = null;
+  let supabaseClient = null;
+  let currentSession = null;
 
   // --- Element Selectors ---
   const tabButtons = document.querySelectorAll('.tab-btn');
+  const vaultShells = document.querySelectorAll('.vault-shell');
+  const authPanel = document.getElementById('auth-panel');
+  const authForm = document.getElementById('auth-form');
+  const authEmail = document.getElementById('auth-email');
+  const authPassword = document.getElementById('auth-password');
+  const signUpBtn = document.getElementById('sign-up-btn');
+  const signOutBtn = document.getElementById('sign-out-btn');
+  const changePasswordBtn = document.getElementById('change-password-btn');
+  const deleteAccountBtn = document.getElementById('delete-account-btn');
+  const accountActionGroup = document.getElementById('account-action-group');
+  const userEmail = document.getElementById('user-email');
   const panels = {
     list: document.getElementById('panel-list'),
     add: document.getElementById('panel-add'),
@@ -81,17 +97,246 @@ document.addEventListener('DOMContentLoaded', () => {
   const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
   const closeDeleteModal = document.getElementById('close-delete-modal');
   const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
+
+  const passwordDialog = document.getElementById('password-dialog');
+  const passwordDialogBackdrop = document.getElementById('password-dialog-backdrop');
+  const passwordForm = document.getElementById('password-form');
+  const accountPasswordInput = document.getElementById('account-password');
+  const closePasswordModal = document.getElementById('close-password-modal');
+  const cancelPasswordBtn = document.getElementById('cancel-password-btn');
+
+  const deleteAccountDialog = document.getElementById('delete-account-dialog');
+  const deleteAccountDialogBackdrop = document.getElementById('delete-account-dialog-backdrop');
+  const confirmAccountDeleteBtn = document.getElementById('confirm-account-delete-btn');
+  const closeAccountDeleteModal = document.getElementById('close-account-delete-modal');
+  const cancelAccountDeleteBtn = document.getElementById('cancel-account-delete-btn');
   
   const toastContainer = document.getElementById('toast-container');
 
   let activeDeleteImdbId = null;
 
+  // --- Authentication ---
+  async function loadAuthConfig() {
+    const response = await fetch('/config');
+    if (!response.ok) throw new Error('Failed to load authentication config.');
+    authConfig = await response.json();
+
+    if (!authConfig.auth_enabled) {
+      state.authReady = true;
+      showVault();
+      return;
+    }
+
+    if (!authConfig.supabase_url || !authConfig.supabase_anon_key) {
+      throw new Error('Supabase is not configured on the server.');
+    }
+
+    supabaseClient = window.supabase.createClient(
+      authConfig.supabase_url,
+      authConfig.supabase_anon_key
+    );
+
+    const { data, error } = await supabaseClient.auth.getSession();
+    if (error) throw error;
+    currentSession = data.session;
+
+    supabaseClient.auth.onAuthStateChange((_event, session) => {
+      currentSession = session;
+      applyAuthState();
+      if (session) fetchAllItems();
+    });
+
+    applyAuthState();
+  }
+
+  function applyAuthState() {
+    const signedIn = Boolean(currentSession);
+    state.authReady = signedIn;
+
+    if (signedIn) {
+      userEmail.textContent = currentSession.user?.email || '';
+      userEmail.classList.remove('hidden');
+      signOutBtn.classList.remove('hidden');
+      accountActionGroup.classList.remove('hidden');
+      showVault();
+    } else {
+      state.items = [];
+      userEmail.classList.add('hidden');
+      signOutBtn.classList.add('hidden');
+      accountActionGroup.classList.add('hidden');
+      hideVault();
+    }
+  }
+
+  function showVault() {
+    authPanel.classList.add('hidden');
+    vaultShells.forEach(el => el.classList.remove('hidden'));
+  }
+
+  function hideVault() {
+    authPanel.classList.remove('hidden');
+    vaultShells.forEach(el => el.classList.add('hidden'));
+  }
+
+  async function getAccessToken() {
+    if (!authConfig?.auth_enabled) return null;
+    const { data, error } = await supabaseClient.auth.getSession();
+    if (error) throw error;
+    currentSession = data.session;
+    return currentSession?.access_token || null;
+  }
+
+  async function apiFetch(url, options = {}) {
+    const token = await getAccessToken();
+    const headers = new Headers(options.headers || {});
+
+    if (token) {
+      headers.set('Authorization', `Bearer ${token}`);
+    }
+
+    return fetch(url, { ...options, headers });
+  }
+
+  async function handleSignIn(e) {
+    e.preventDefault();
+    const email = authEmail.value.trim();
+    const password = authPassword.value;
+
+    try {
+      const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+      showToast('Signed in successfully.', 'success');
+    } catch (error) {
+      showToast(error.message, 'error');
+    }
+  }
+
+  async function handleSignUp() {
+    const email = authEmail.value.trim();
+    const password = authPassword.value;
+
+    try {
+      const { error } = await supabaseClient.auth.signUp({ email, password });
+      if (error) throw error;
+      showToast('Account created. Check your email if confirmation is enabled.', 'success');
+    } catch (error) {
+      showToast(error.message, 'error');
+    }
+  }
+
+  async function handleSignOut() {
+    try {
+      const { error } = await supabaseClient.auth.signOut();
+      if (error) throw error;
+      showToast('Signed out.', 'success');
+    } catch (error) {
+      showToast(error.message, 'error');
+    }
+  }
+
+  function openPasswordDialog() {
+    if (!passwordDialog) return;
+    accountPasswordInput.value = '';
+    clearValidationErrors(passwordForm);
+    passwordDialog.showModal();
+    if (passwordDialogBackdrop) passwordDialogBackdrop.setAttribute('data-open', 'true');
+    lucide.createIcons();
+  }
+
+  function openDeleteAccountDialog() {
+    if (!deleteAccountDialog) return;
+    clearValidationErrors(passwordForm);
+    deleteAccountDialog.showModal();
+    if (deleteAccountDialogBackdrop) deleteAccountDialogBackdrop.setAttribute('data-open', 'true');
+    lucide.createIcons();
+  }
+
+  function closePasswordDialog() {
+    passwordDialog.close();
+    if (passwordDialogBackdrop) passwordDialogBackdrop.setAttribute('data-open', 'false');
+  }
+
+  function closeDeleteAccountDialog() {
+    deleteAccountDialog.close();
+    if (deleteAccountDialogBackdrop) deleteAccountDialogBackdrop.setAttribute('data-open', 'false');
+  }
+
+  // Backdrop click to close
+  if (passwordDialogBackdrop) {
+    passwordDialogBackdrop.addEventListener('click', closePasswordDialog);
+  }
+  if (deleteAccountDialogBackdrop) {
+    deleteAccountDialogBackdrop.addEventListener('click', closeDeleteAccountDialog);
+  }
+
+  async function handleChangePassword(e) {
+    e.preventDefault();
+    const newPassword = accountPasswordInput.value.trim();
+
+    if (newPassword.length < 6) {
+      showToast('Password must be at least 6 characters.', 'error');
+      return;
+    }
+
+    try {
+      if (authConfig?.auth_enabled && supabaseClient) {
+        const { data, error } = await supabaseClient.auth.updateUser({ password: newPassword });
+        if (error) throw error;
+      } else {
+        const response = await apiFetch('/account/password', {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ password: newPassword }),
+        });
+
+        if (!response.ok) {
+          const text = await response.text();
+          let message = text || 'Unable to update password.';
+          try {
+            const json = JSON.parse(text);
+            message = json.detail || json.error || json.message || message;
+          } catch {
+            // ignore non-JSON error response
+          }
+          throw new Error(message);
+        }
+      }
+
+      closePasswordDialog();
+      showToast('Password updated successfully.', 'success');
+    } catch (error) {
+      showToast(error?.message || String(error) || 'Unable to update password.', 'error');
+    }
+  }
+
+  async function handleDeleteAccount() {
+    try {
+      const response = await apiFetch('/account', {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        const text = await response.text();
+        throw new Error(text || 'Unable to delete account.');
+      }
+
+      closeDeleteAccountDialog();
+      await handleSignOut();
+      showToast('Account deleted successfully.', 'success');
+    } catch (error) {
+      showToast(error.message, 'error');
+    }
+  }
+
   // --- API Fetch Functions ---
   async function fetchAllItems() {
+    if (!state.authReady) return;
     showLoader();
     try {
       // Hitting search with no queries returns all items in the db
-      const response = await fetch('/search');
+      const response = await apiFetch('/search');
       if (response.status === 404) {
         state.items = [];
         render();
@@ -130,7 +375,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     try {
-      const response = await fetch('/add_item', {
+      const response = await apiFetch('/add_item', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -169,7 +414,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     try {
-      const response = await fetch(`/update_item/${imdbId}`, {
+      const response = await apiFetch(`/update_item/${imdbId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -192,7 +437,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!activeDeleteImdbId) return;
 
     try {
-      const response = await fetch(`/delete_item/${activeDeleteImdbId}`, {
+      const response = await apiFetch(`/delete_item/${activeDeleteImdbId}`, {
         method: 'DELETE'
       });
 
@@ -213,7 +458,7 @@ document.addEventListener('DOMContentLoaded', () => {
   async function quickToggleWatched(imdbId, title) {
     // Standard quick "Mark as Watched" sets watched=true, but since rating/comment are optional, we can just save it with no rating/comment
     try {
-      const response = await fetch(`/update_item/${imdbId}`, {
+      const response = await apiFetch(`/update_item/${imdbId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ watched: true })
@@ -756,6 +1001,26 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // --- Event Listeners Wiring ---
+
+  authForm.addEventListener('submit', handleSignIn);
+  signUpBtn.addEventListener('click', handleSignUp);
+  signOutBtn.addEventListener('click', handleSignOut);
+  changePasswordBtn.addEventListener('click', openPasswordDialog);
+  deleteAccountBtn.addEventListener('click', openDeleteAccountDialog);
+  passwordForm.addEventListener('submit', handleChangePassword);
+  passwordDialog.addEventListener('close', () => {
+    clearValidationErrors(passwordForm);
+  });
+  
+  deleteAccountDialog.addEventListener('close', () => {
+    clearValidationErrors(passwordForm);
+  });
+  
+  closePasswordModal.addEventListener('click', closePasswordDialog);
+  cancelPasswordBtn.addEventListener('click', closePasswordDialog);
+  closeAccountDeleteModal.addEventListener('click', closeDeleteAccountDialog);
+  cancelAccountDeleteBtn.addEventListener('click', closeDeleteAccountDialog);
+  confirmAccountDeleteBtn.addEventListener('click', handleDeleteAccount);
   
   // Tabs Navigation
   tabButtons.forEach(btn => {
@@ -880,7 +1145,13 @@ document.addEventListener('DOMContentLoaded', () => {
   async function init() {
     lucide.createIcons();
     resetAddForm();
-    await fetchAllItems();
+    try {
+      await loadAuthConfig();
+      if (state.authReady) await fetchAllItems();
+    } catch (error) {
+      hideVault();
+      showToast(error.message, 'error');
+    }
   }
 
   init();
