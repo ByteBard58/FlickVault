@@ -18,8 +18,6 @@ def auth_enabled() -> bool:
 def public_auth_config() -> Dict:
   return {
     "auth_enabled": auth_enabled(),
-    "supabase_url": get_env("SUPABASE_URL"),
-    "supabase_anon_key": get_env("SUPABASE_ANON_KEY", "SUPABASE_KEY"),
   }
 
 

@@ -127,13 +127,13 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    if (!authConfig.supabase_url || !authConfig.supabase_anon_key) {
-      throw new Error('Supabase is not configured on the server.');
+    if (!window.APP_CONFIG?.supabase_url || !window.APP_CONFIG?.supabase_anon_key) {
+      throw new Error('Supabase is not configured in the client application.');
     }
 
     supabaseClient = window.supabase.createClient(
-      authConfig.supabase_url,
-      authConfig.supabase_anon_key
+      window.APP_CONFIG.supabase_url,
+      window.APP_CONFIG.supabase_anon_key
     );
 
     const { data, error } = await supabaseClient.auth.getSession();
