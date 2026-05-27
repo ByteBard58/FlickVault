@@ -91,42 +91,44 @@ def update_data(imdb_id: str, value: Dict, user_id: str) -> None:
 
 
 def delete_all_user_data(user_id: str) -> int:
-  query = media_items.delete().where(media_items.c.user_id == user_id)
-  with engine.begin() as connection:
-    result = connection.execute(query)
-  return int(result.rowcount or 0)
+    query = media_items.delete().where(media_items.c.user_id == user_id)
+    with engine.begin() as connection:
+        result = connection.execute(query)
+    return int(result.rowcount or 0)
 
 
 def _get_item(user_id: str, imdb_id: str) -> Dict | None:
-  query = select(media_items).where(
-    and_(
-      media_items.c.user_id == user_id,
-      media_items.c.imdb_id == imdb_id,
+    query = select(media_items).where(
+        and_(
+            media_items.c.user_id == user_id,
+            media_items.c.imdb_id == imdb_id,
+        )
     )
-  )
-  with engine.begin() as connection:
-    row = connection.execute(query).first()
-  return _row_to_dict(row) if row else None
+    with engine.begin() as connection:
+        row = connection.execute(query).first()
+    return _row_to_dict(row) if row else None
 
 
 def _item_exists(user_id: str, imdb_id: str) -> bool:
-  return _get_item(user_id, imdb_id) is not None
+    return _get_item(user_id, imdb_id) is not None
 
 
 def _storage_row(value: Dict, user_id: str) -> Dict:
-  row = {
-    "uuid": str(value["uuid"]),
-    "user_id": user_id,
-    "imdb_id": value["imdb_id"],
-    "title": value["title"],
-    "year": value["year"],
-    "end_year": value.get("end_year"),
-    "poster_url": value.get("poster_url"),
-    "watched": value["watched"],
-    "rating": value.get("rating"),
-    "comment": value.get("comment"),
-    "date_added": value["date_added"],
-  }
-  if isinstance(row["date_added"], str):
-    row["date_added"] = datetime.fromisoformat(row["date_added"].replace("Z", "+00:00"))
-  return row
+    row = {
+        "uuid": str(value["uuid"]),
+        "user_id": user_id,
+        "imdb_id": value["imdb_id"],
+        "title": value["title"],
+        "year": value["year"],
+        "end_year": value.get("end_year"),
+        "poster_url": value.get("poster_url"),
+        "watched": value["watched"],
+        "rating": value.get("rating"),
+        "comment": value.get("comment"),
+        "date_added": value["date_added"],
+    }
+    if isinstance(row["date_added"], str):
+        row["date_added"] = datetime.fromisoformat(
+            row["date_added"].replace("Z", "+00:00")
+        )
+    return row
