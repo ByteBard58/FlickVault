@@ -185,15 +185,15 @@ def change_password(
 
 @app.delete("/account")
 def delete_account(
-  token: str = Depends(get_current_user_token),
-  user_id: str = Depends(get_current_user),
+   token: str = Depends(get_current_user_token),
+   user_id: str = Depends(get_current_user),
 ):
-  delete_user_account(token)
-  removed = delete_all_user_data(user_id)
-  return JSONResponse(
-    status_code=200,
-    content={
-      "status": "Account deleted successfully",
-      "removed_items": removed,
-    },
-  )
+   delete_user_account(user_id)
+   removed = delete_all_user_data(user_id)
+   return JSONResponse(
+     status_code=200,
+     content={
+       "status": "Account deleted successfully",
+       "removed_items": removed,
+     },
+   )

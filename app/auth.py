@@ -172,19 +172,35 @@ def change_user_password(token: str, new_password: str) -> None:
     )
 
 
-def delete_user_account(token: str) -> None:
-  supabase_url = get_env("SUPABASE_URL")
-  if not supabase_url:
-    raise HTTPException(status_code=500, detail="SUPABASE_URL is not configured")
+def delete_user_account(user_id: str) -> None:
+   supabase_url = get_env("SUPABASE_URL")
+   supabase_service_role_key = get_env("SUPABASE_SERVICE_ROLE_KEY")
+   if not supabase_url:
+     raise HTTPException(status_code=500, detail="SUPABASE_URL is not configured")
+   if not supabase_service_role_key:
+     raise HTTPException(status_code=500, detail="SUPABASE_SERVICE_ROLE_KEY is not configured")
 
-  try:
-    response = httpx.delete(
-      f"{supabase_url.rstrip('/')}/auth/v1/user",
-      headers=_supabase_auth_headers(token),
-      timeout=10,
-    )
-  except httpx.HTTPError as exc:
-    raise HTTPException(status_code=500, detail=f"Could not delete account: {exc}")
+   try:
+     response = httpx.delete(
+       f"{supabase_url.rstrip('/')}/auth/v1/admin/users/{user_id}",
+       headers={
+         "apikey": supabase_service_role_key,
+         "Authorization": f"Bearer {supabase_service_role_key}",
+       },
+       timeout=10,
+     )
+   except httpx.HTTPError as exc:
+     raise HTTPException(status_code=500, detail=f"Could not delete account: {exc}")
 
-  if response.status_code not in {200, 202, 204}:
-    raise HTTPException(status_code=response.status_code, detail=response.text or "Unable to delete account")
+   if response.status_code not in {200, 204}:
+     detail = None
+     try:
+       payload = response.json()
+       detail = payload.get("message") or payload.get("error") or payload.get("detail") or str(payload)
+     except ValueError:
+       detail = response.text
+
+     raise HTTPException(
+       status_code=response.status_code,
+       detail=detail or "Unable to delete account",
+     )
