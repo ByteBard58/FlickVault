@@ -29,20 +29,28 @@ The app serves both a browser UI and a JSON API from the same FastAPI server.
 
 ```text
 FlickVault/
-├── app/
-│   ├── app.py                  # FastAPI app and API routes
-│   └── schema/
-│       └── validation.py       # Pydantic models and validation rules
-├── data/
-│   ├── database.py             # SQLAlchemy database setup
-│   ├── db.json                 # Legacy local seed/reference data
-│   └── helpers.py              # Database helpers
-├── static/
-│   ├── index.html              # Main frontend page
-│   ├── style.css               # Frontend styles
-│   └── app.js                  # Frontend behavior and API calls
-├── requirements.txt
-└── README.md
+├─ app/
+│  ├─ schema/
+│  │  ├─ __init__.py
+│  │  └─ validation.py
+│  ├─ __init__.py
+│  ├─ app.py
+│  ├─ auth.py
+│  └─ config.py
+├─ data/
+│  ├─ __init__.py
+│  ├─ database.py
+│  └─ helpers.py
+├─ static/
+│  ├─ app.js
+│  ├─ index.html
+│  └─ style.css
+├─ .env.example
+├─ .gitignore
+├─ LICENSE
+├─ README.md
+├─ requirements.txt
+└─ supabase_schema.sql
 ```
 
 ## 🚀 Getting Started
